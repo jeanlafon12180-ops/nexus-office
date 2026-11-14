@@ -20,6 +20,9 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QInputDialog>
+#include <QLineEdit>
+#include <QStandardPaths>
+#include <QUrl>
 #include <QTableWidgetSelectionRange>
 #include <functional>
 
