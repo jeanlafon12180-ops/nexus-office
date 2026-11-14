@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "writer/writerpage.h"
 
 #include <QFileDialog>
 #include <QFrame>
@@ -173,7 +174,7 @@ MainWindow::MainWindow(QWidget *parent)
     };
 
     pages->addWidget(buildHome());
-    pages->addWidget(buildModule("Nexus Writer", "A focused space for text documents."));
+    pages->addWidget(new WriterPage);
     pages->addWidget(buildModule("Nexus Sheets", "A workspace for spreadsheets and calculations."));
     pages->addWidget(buildModule("Nexus Slides", "A canvas for presentations."));
     pages->addWidget(buildModule("Nexus PDF", "A home for PDF documents and workflows."));
