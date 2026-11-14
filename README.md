@@ -8,7 +8,7 @@ Nexus Office est une application Qt pour Windows et Linux (macOS prévu). Elle r
 
 | Module | Fonctionnalités actuelles | Limites |
 |---|---|---|
-| **Nexus Writer** | Édition riche, mise en forme, TXT, HTML, Markdown, ouverture/export DOCX via LibreOffice | LibreOffice doit être installé pour DOCX ; fidélité de mise en page à tester |
+| **Nexus Writer** | Édition riche, mise en forme de base, recherche, annuler/rétablir, TXT, HTML, Markdown, export PDF et ouverture/export DOCX via LibreOffice | DOCX dépend de LibreOffice ; fidélité de mise en page encore à valider ; outils avancés à développer |
 | **Nexus Sheets** | Grille éditable, import/export CSV, ajout de lignes/colonnes, formules simples | Pas de fichiers XLSX natifs ; formules limitées |
 | **Nexus Slides** | Création d'une diapositive titre/contenu, export PDF | Pas encore de gestion multi-diapositives ni de PPTX |
 | **Nexus PDF** | Ouvre un PDF avec le lecteur par défaut du système | Pas de lecteur PDF intégré ni d'édition/annotation |
