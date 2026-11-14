@@ -80,6 +80,11 @@ if(BUILD_TESTING)
         add_test(NAME writer-docx-roundtrip
             COMMAND bash ${CMAKE_SOURCE_DIR}/tests/writer_docx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE})
     endif()
+
+    if(LIBREOFFICE_EXECUTABLE)
+        add_test(NAME slides-pptx-roundtrip
+            COMMAND bash ${CMAKE_SOURCE_DIR}/tests/slides_pptx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE})
+    endif()
 endif()
 
 set_target_properties(nexus-office PROPERTIES
