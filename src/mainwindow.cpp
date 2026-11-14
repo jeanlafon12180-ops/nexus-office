@@ -136,3 +136,32 @@ MainWindow::MainWindow(QWidget *parent)
     pages->addWidget(new SheetPage);
     pages->addWidget(new SlidesPage);
     pages->addWidget(new PdfPage);
+
+    root->addWidget(sidebar);
+    root->addWidget(pages, 1);
+    setCentralWidget(central);
+    applyTheme(true);
+}
+
+void MainWindow::applyTheme(bool dark)
+{
+    if (dark) {
+        setStyleSheet(R"(
+            QMainWindow, QWidget { background: #111827; color: #f9fafb; }
+            QWidget#sidebar { background: #0b1220; }
+            QLabel#brand { color: #ffffff; font-size: 20px; font-weight: 700; }
+            QLabel#sidebarMuted, QLabel#muted, QLabel#notice { color: #9ca3af; }
+            QLabel#sidebarSection { color: #6b7280; font-size: 10px; font-weight: 700; }
+            QLabel#pageHeading { font-size: 28px; font-weight: 700; }
+            QLabel#sectionHeading { font-size: 18px; font-weight: 600; }
+            QLabel#cardTitle { font-size: 16px; font-weight: 700; }
+            QPushButton#navButton { text-align: left; padding: 11px 12px; border: 0; border-radius: 8px; color: #cbd5e1; }
+            QPushButton#navButton:hover, QPushButton#navButton:checked { background: #1f2937; color: #ffffff; }
+            QPushButton#secondaryButton { padding: 9px 16px; border: 1px solid #374151; border-radius: 8px; background: #1f2937; }
+            QFrame#moduleCard { background: #1f2937; border: 1px solid #374151; border-radius: 12px; }
+            QTextEdit, QPlainTextEdit, QLineEdit, QTableWidget { background: #1f2937; color: #f9fafb; border: 1px solid #374151; }
+        )");
+    } else {
+        setStyleSheet(QString());
+    }
+}
