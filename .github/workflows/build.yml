@@ -18,7 +18,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build g++ qt6-base-dev libreoffice-writer hunspell hunspell-fr
+          sudo apt-get install -y cmake ninja-build g++ qt6-base-dev libreoffice-writer libreoffice-impress hunspell hunspell-fr
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
