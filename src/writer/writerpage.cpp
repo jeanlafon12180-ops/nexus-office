@@ -431,6 +431,10 @@ void WriterPage::exportPdf()
     if (path.isEmpty()) return;
     if (QFileInfo(path).suffix().isEmpty()) path += ".pdf";
     QPrinter printer(QPrinter::HighResolution);
+    QPageSetupDialog pageSetup(&printer, this);
+    pageSetup.setWindowTitle("Mise en page du PDF");
+    if (pageSetup.exec() != QDialog::Accepted)
+        return;
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(path);
     editor_->document()->print(&printer);
