@@ -217,6 +217,11 @@ void SheetPage::saveXlsx()
         QMessageBox::warning(this,"Export XLSX",QString::fromLocal8Bit(process.readAllStandardError())); return;
     }
     const QString generated=temp.filePath("NexusSheets.xlsx");
+    // QFile::copy does not overwrite an existing destination.
+    if (QFileInfo::exists(path) && !QFile::remove(path)) {
+        QMessageBox::warning(this,"Export XLSX","Impossible de remplacer le fichier existant.");
+        return;
+    }
     if (!QFileInfo::exists(generated) || !QFile::copy(generated,path)) {
         QMessageBox::warning(this,"Export XLSX","Le fichier XLSX n'a pas pu être créé à cet emplacement."); return;
     }
