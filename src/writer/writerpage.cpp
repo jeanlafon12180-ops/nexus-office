@@ -97,6 +97,7 @@ WriterPage::WriterPage(QWidget *parent)
     auto *saveButton = new QPushButton("Enregistrer", this);
     auto *pdfButton = new QPushButton("Exporter PDF", this);
     auto *printButton = new QPushButton("Imprimer", this);
+    auto *spellButton = new QPushButton("Orthographe", this);
     newButton->setObjectName("writerSecondary");
     openButton->setObjectName("writerSecondary");
     saveButton->setObjectName("writerPrimary");
@@ -105,6 +106,7 @@ WriterPage::WriterPage(QWidget *parent)
     header->addWidget(saveButton);
     header->addWidget(pdfButton);
     header->addWidget(printButton);
+    header->addWidget(spellButton);
     layout->addLayout(header);
 
     auto *notice = new QLabel(
@@ -186,6 +188,7 @@ WriterPage::WriterPage(QWidget *parent)
     connect(saveButton, &QPushButton::clicked, this, &WriterPage::saveDocument);
     connect(pdfButton, &QPushButton::clicked, this, &WriterPage::exportPdf);
     connect(printButton, &QPushButton::clicked, this, &WriterPage::printDocument);
+    connect(spellButton, &QPushButton::clicked, this, &WriterPage::checkSpelling);
     connect(undoAction, &QAction::triggered, editor_, &QTextEdit::undo);
     connect(redoAction, &QAction::triggered, editor_, &QTextEdit::redo);
     auto *findAction = toolbar->addAction("Rechercher");
@@ -530,6 +533,51 @@ void WriterPage::insertImage()
     cursor.insertImage(format);
     editor_->setTextCursor(cursor);
     editor_->setFocus();
+}
+
+
+void WriterPage::checkSpelling()
+{
+    const QString hunspell = QStandardPaths::findExecutable("hunspell");
+    if (hunspell.isEmpty()) {
+        QMessageBox::information(this, "Correcteur orthographique",
+            "Hunspell n’est pas installé. Installez Hunspell avec le dictionnaire français pour activer cette fonction.");
+        return;
+    }
+
+    QProcess process;
+    process.start(hunspell, {"-l", "-d", "fr_FR"});
+    if (!process.waitForStarted(5000)) {
+        QMessageBox::warning(this, "Correcteur orthographique", "Impossible de démarrer Hunspell.");
+        return;
+    }
+    process.write(editor_->toPlainText().toUtf8());
+    process.closeWriteChannel();
+    if (!process.waitForFinished(15000)) {
+        process.kill();
+        process.waitForFinished();
+        QMessageBox::warning(this, "Correcteur orthographique", "La vérification a dépassé le délai autorisé.");
+        return;
+    }
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+        const QString details = QString::fromLocal8Bit(process.readAllStandardError()).trimmed();
+        QMessageBox::warning(this, "Correcteur orthographique",
+            details.isEmpty() ? "Hunspell ou le dictionnaire français n’est pas disponible." : details);
+        return;
+    }
+
+    const QStringList misspelled = QString::fromUtf8(process.readAllStandardOutput())
+        .split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+    if (misspelled.isEmpty()) {
+        QMessageBox::information(this, "Correcteur orthographique", "Aucune faute détectée avec le dictionnaire français.");
+        return;
+    }
+    const QString report = misspelled.mid(0, 80).join("\n");
+    const QString suffix = misspelled.size() > 80
+        ? QString("\n… et %1 autre(s) mot(s).").arg(misspelled.size() - 80)
+        : QString();
+    QMessageBox::information(this, "Mots à vérifier",
+        report + suffix + "\n\nCette liste est une aide : vérifiez le contexte avant toute correction.");
 }
 
 void WriterPage::updateDocumentInfo()
