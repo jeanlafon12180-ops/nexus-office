@@ -13,7 +13,7 @@ cat > "$WORK_DIR/source.html" <<'HTML'
 HTML
 
 "$SOFFICE" "-env:UserInstallation=file://$WORK_DIR/profile" --headless \
-  --convert-to docx --outdir "$WORK_DIR/docx" "$WORK_DIR/source.html" >/dev/null
+  --convert-to 'docx:Office Open XML Text' --outdir "$WORK_DIR/docx" "$WORK_DIR/source.html" >/dev/null
 test -s "$WORK_DIR/docx/source.docx"
 
 "$SOFFICE" "-env:UserInstallation=file://$WORK_DIR/profile" --headless \
