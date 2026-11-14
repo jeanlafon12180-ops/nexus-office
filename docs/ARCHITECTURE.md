@@ -1,16 +1,16 @@
 # Architecture
 
-## Current milestone: desktop shell (0.1.0)
+## Current milestone: document-engine boundary (0.2.0)
 
-The first milestone is a native Qt 6 Widgets application that establishes the Nexus Office window, navigation concept, and visual language.
+The application has a native Qt 6 desktop shell. This milestone introduces a Nexus-owned C++ interface for document-engine operations and a placeholder implementation that reports the engine as unavailable.
 
-The shell is not yet connected to a document engine. File selection is only a user-interface demonstration: selecting a file does not open, edit, or convert it.
+The placeholder deliberately refuses to open, save, or close documents. It prevents the UI or future modules from claiming that a document operation succeeded before a real backend exists.
 
-## Planned layers
+## Layers
 
 1. **Desktop shell** — application window, navigation, settings, theming.
-2. **Document-engine adapter** — a small Nexus-owned interface that isolates the UI from LibreOfficeKit-specific calls.
-3. **LibreOfficeKit backend** — document loading, rendering, editing, saving, and lifecycle management, subject to API and platform validation.
+2. **Document-engine interface** — `nexus::documents::DocumentEngine`, independent of Qt and LibreOfficeKit.
+3. **Backend implementations** — the current unavailable backend, followed by a separately implemented LibreOfficeKit backend.
 4. **Product modules** — Writer, Sheets, Slides, and PDF workflows.
 5. **Packaging** — platform-specific builds and installers.
 6. **Quality** — automated tests, accessibility, localization, and compatibility checks.
@@ -18,13 +18,13 @@ The shell is not yet connected to a document engine. File selection is only a us
 ## Integration principles
 
 - Keep the user interface separate from document-engine integration.
-- Keep LibreOfficeKit-specific types out of general UI classes.
+- Keep LibreOfficeKit-specific types out of general UI classes and the public engine interface.
+- Report unsupported operations explicitly; never report success for an operation that was not performed.
 - Validate the supported LibreOfficeKit API surface and runtime requirements on each target platform before committing to editor features.
-- Treat document loading, rendering, editing, saving, and shutdown as separate testable capabilities.
+- Treat initialization, loading, rendering, editing, saving, and shutdown as separate testable capabilities.
 - Avoid copying third-party source until its license and required notices have been reviewed.
 - Keep platform-specific code isolated behind small interfaces.
-- Do not enable the optional CMake dependency switch until the matching development package is installed and verified.
 
 ## Current integration status
 
-CMake contains an opt-in dependency check for LibreOfficeKit. It is disabled by default and does not mean the engine is integrated. The application continues to build as a standalone Qt shell.
+The document-engine boundary and unavailable backend are implemented. LibreOfficeKit is not yet linked or called. The optional CMake dependency check remains OFF by default and is only a preliminary dependency check, not an integration.
