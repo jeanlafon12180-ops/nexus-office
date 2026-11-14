@@ -163,8 +163,8 @@ MainWindow::MainWindow(QWidget *parent)
             if (!file.isEmpty()) {
                 QMessageBox::information(
                     this, "Fichier sélectionné",
-                    "Fichier sélectionné :\\n" + file +
-                    "\\n\\nCe module n’est pas encore opérationnel. "
+                    "Fichier sélectionné :\n" + file +
+                    "\n\nCe module n’est pas encore opérationnel. "
                     "Le fichier n’a pas été ouvert ni modifié.");
             }
         });
