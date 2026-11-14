@@ -5,6 +5,7 @@
 #include <QSet>
 #include <functional>
 #include <cmath>
+#include <utility>
 
 namespace nexus::sheets {
 
