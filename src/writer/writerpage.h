@@ -33,4 +33,5 @@ private:
     void insertImage();
     void applyParagraphStyle(int index);
     void insertList(bool numbered);
+    void printDocument();
 };
