@@ -77,6 +77,15 @@ if(BUILD_TESTING)
     target_link_libraries(formulaengine-tests PRIVATE Qt6::Core)
     add_test(NAME sheets-formula-engine COMMAND formulaengine-tests)
 
+    qt_add_executable(slides-ui-tests
+        tests/slides_ui_test.cpp
+        src/slides/slidespage.cpp
+        src/slides/slidespage.h
+    )
+    target_link_libraries(slides-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport)
+    add_test(NAME slides-ui-structure COMMAND slides-ui-tests)
+    set_tests_properties(slides-ui-structure PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
     find_package(Python3 COMPONENTS Interpreter QUIET)
     find_program(LIBREOFFICE_EXECUTABLE NAMES soffice)
     if(LIBREOFFICE_EXECUTABLE)
