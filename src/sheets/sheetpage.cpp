@@ -32,7 +32,7 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     add("Ouvrir CSV", [this]{openCsv();});
     add("Enregistrer CSV", [this]{saveCsv();});
     root->addLayout(top);
-    auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules prises en charge : =A1+B1, =A1*2 et =SUM(A1:B4).",this);
+    auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules : +, -, *, /, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX, COUNT sur une plage.",this);
     hint->setWordWrap(true); hint->setStyleSheet("color:#52627a;background:transparent");
     root->addWidget(hint);
     table_ = new QTableWidget(30,12,this);
