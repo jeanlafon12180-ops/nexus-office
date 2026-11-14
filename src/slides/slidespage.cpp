@@ -276,10 +276,10 @@ void SlidesPage::exportPptx()
       "<office:document xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" "
       "xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" "
       "xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" "
-      "office:version=\"1.2\"><office:body><office:presentation>";
+      "office:version=\"1.2\" office:mimetype=\"application/vnd.oasis.opendocument.presentation\" office:class=\"presentation\"><office:automatic-styles/><office:master-styles/><office:body><office:presentation>";
     for(int i=0;i<slides_.size();++i){
         const auto &slide=slides_[i];
-        fodp+="<draw:page draw:name=\"Slide"+QString::number(i+1)+"\">";
+        fodp+="<draw:page draw:name=\"Slide"+QString::number(i+1)+"\" draw:master-page-name=\"Default\">";
         fodp+="<draw:frame><draw:text-box><text:p>"+slide.title->text().toHtmlEscaped()+"</text:p>";
         const QStringList lines=slide.body->toPlainText().split('\n');
         for(const QString &line:lines)fodp+="<text:p>"+line.toHtmlEscaped()+"</text:p>";
