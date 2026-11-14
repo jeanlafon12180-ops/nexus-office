@@ -26,7 +26,7 @@ Nexus Office aims to provide a clean, familiar productivity experience inspired 
 - **C++17**
 - **Qt 6 Widgets**
 - **CMake 3.21+**
-- **LibreOfficeKit:** planned document-engine integration; not connected yet
+- **LibreOfficeKit:** planned document-engine integration; preparation only
 
 ## Build the desktop preview
 
@@ -41,6 +41,8 @@ cmake --build build
 
 Run the generated `nexus-office` executable from the build directory. The exact path depends on your operating system and build generator.
 
+LibreOfficeKit is an optional future dependency. The current application does not call its API. See [the integration plan](docs/LIBREOFFICEKIT-INTEGRATION.md).
+
 ## Current features
 
 - Native Qt desktop window
@@ -52,10 +54,11 @@ Run the generated `nexus-office` executable from the build directory. The exact 
 ## Next milestones
 
 1. Validate and improve the desktop shell on Windows, Linux, and macOS.
-2. Integrate LibreOfficeKit and verify document loading and editing.
-3. Add Writer, Sheets, and Slides workflows.
-4. Add PDF viewing and export workflows.
-5. Package and test platform-specific installers.
+2. Verify LibreOfficeKit headers, runtime dependencies, API, and licensing on each platform.
+3. Implement a Nexus-owned document-engine adapter and test document loading and rendering.
+4. Add Writer, Sheets, and Slides workflows.
+5. Add PDF viewing and export workflows.
+6. Package and test platform-specific installers.
 
 ## Licensing
 
