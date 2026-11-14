@@ -29,4 +29,8 @@ private:
     void saveDocumentAs();
     void findText();
     void exportPdf();
+    void insertTable();
+    void insertImage();
+    void applyParagraphStyle(int index);
+    void insertList(bool numbered);
 };
