@@ -1,13 +1,19 @@
 #pragma once
 #include <QWidget>
-class QTableWidget;\nclass QTabWidget;
+#include <QString>
+
+class QTableWidget;
+class QTabWidget;
 class QLabel;
+
 class SheetPage final : public QWidget {
     Q_OBJECT
 public:
     explicit SheetPage(QWidget *parent = nullptr);
 private:
-    QTableWidget *table_ = nullptr;\n    QTabWidget *tabs_ = nullptr;\n    int nextSheetNumber_ = 2;
+    QTableWidget *table_ = nullptr;
+    QTabWidget *tabs_ = nullptr;
+    int nextSheetNumber_ = 2;
     QLabel *status_ = nullptr;
     void newSheet();
     void openCsv();
@@ -17,6 +23,7 @@ private:
     void sortByCurrentColumn();
     void filterRows();
     void clearFilter();
+    void showChart();
     void addRow();
     void addColumn();
     void recalculate();
