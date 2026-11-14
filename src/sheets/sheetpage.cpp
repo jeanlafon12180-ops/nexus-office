@@ -13,6 +13,14 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QSet>
+#include <QProcess>
+#include <QTemporaryDir>
+#include <QDir>
+#include <QPainter>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QInputDialog>
+#include <QTableWidgetSelectionRange>
 #include <functional>
 
 namespace {
@@ -37,6 +45,11 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     add("Ajouter une colonne", [this]{addColumn();});
     add("Ouvrir CSV", [this]{openCsv();});
     add("Enregistrer CSV", [this]{saveCsv();});
+    add("Ouvrir XLSX", [this]{openXlsx();});
+    add("Enregistrer XLSX", [this]{saveXlsx();});
+    add("Trier la colonne", [this]{sortByCurrentColumn();});
+    add("Filtrer", [this]{filterRows();});
+    add("Effacer filtre", [this]{clearFilter();});
     root->addLayout(top);
     auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules : +, -, *, /, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX, COUNT sur une plage.",this);
     hint->setWordWrap(true); hint->setStyleSheet("color:#52627a;background:transparent");
@@ -106,6 +119,111 @@ void SheetPage::openCsv(){
         if(table_->columnCount()<values.size())table_->setColumnCount(values.size());table_->insertRow(row);
         for(int c=0;c<values.size();++c)table_->setItem(row,c,new QTableWidgetItem(values[c]));++row;}
     if(table_->columnCount()==0)table_->setColumnCount(1);table_->setRowCount(qMax(30,table_->rowCount()));table_->blockSignals(false);recalculate();status_->setText("Ouvert : "+QFileInfo(path).fileName());
+}
+
+void SheetPage::openXlsx()
+{
+    const QString path = QFileDialog::getOpenFileName(this, "Ouvrir un classeur Excel", QString(), "Classeur Excel (*.xlsx)");
+    if (path.isEmpty()) return;
+    const QString soffice = QStandardPaths::findExecutable("soffice");
+    if (soffice.isEmpty()) { QMessageBox::warning(this, "Import XLSX", "LibreOffice Calc est nécessaire pour importer les fichiers XLSX."); return; }
+    QTemporaryDir temp;
+    if (!temp.isValid()) return;
+    QProcess process;
+    process.start(soffice, {"-env:UserInstallation=" + QUrl::fromLocalFile(temp.filePath("profile")).toString(),
+        "--headless", "--convert-to", "csv:Text - txt - csv (StarCalc)", "--outdir", temp.path(), path});
+    if (!process.waitForStarted(5000) || !process.waitForFinished(60000) || process.exitCode() != 0) {
+        QMessageBox::warning(this, "Import XLSX", QString::fromLocal8Bit(process.readAllStandardError())); return;
+    }
+    const QString csvPath = temp.filePath(QFileInfo(path).completeBaseName() + ".csv");
+    QFile csv(csvPath);
+    if (!csv.open(QIODevice::ReadOnly | QIODevice::Text)) { QMessageBox::warning(this, "Import XLSX", "Conversion CSV introuvable."); return; }
+    table_->blockSignals(true); table_->clearContents(); table_->setRowCount(0); table_->setColumnCount(0);
+    QTextStream in(&csv); int row = 0;
+    while (!in.atEnd()) {
+        const QString line = in.readLine();
+        QStringList values; QString value; bool quoted = false;
+        for (qsizetype i=0;i<line.size();++i) {
+            const QChar ch=line[i];
+            if (ch=='"') { if (quoted && i+1<line.size() && line[i+1]=='"') { value+='"'; ++i; } else quoted=!quoted; }
+            else if (ch==';' && !quoted) { values<<value; value.clear(); }
+            else value+=ch;
+        }
+        values<<value;
+        if (table_->columnCount()<values.size()) table_->setColumnCount(values.size());
+        table_->insertRow(row);
+        for (int col=0;col<values.size();++col) table_->setItem(row,col,new QTableWidgetItem(values[col]));
+        ++row;
+    }
+    if (table_->columnCount()==0) table_->setColumnCount(1);
+    table_->setRowCount(qMax(30,table_->rowCount())); table_->blockSignals(false); recalculate();
+    status_->setText("Classeur XLSX importé (première feuille) : "+QFileInfo(path).fileName());
+}
+
+void SheetPage::saveXlsx()
+{
+    const QString path = QFileDialog::getSaveFileName(this, "Exporter en classeur Excel", "Classeur.xlsx", "Classeur Excel (*.xlsx)");
+    if (path.isEmpty()) return;
+    const QString soffice = QStandardPaths::findExecutable("soffice");
+    if (soffice.isEmpty()) { QMessageBox::warning(this, "Export XLSX", "LibreOffice Calc est nécessaire pour exporter en XLSX."); return; }
+    QTemporaryDir temp;
+    if (!temp.isValid()) return;
+    const QString csvPath = temp.filePath("NexusSheets.csv");
+    QFile csv(csvPath);
+    if (!csv.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    QTextStream out(&csv);
+    for (int row=0;row<table_->rowCount();++row) {
+        QStringList values;
+        for (int col=0;col<table_->columnCount();++col) {
+            QString value = table_->item(row,col) ? table_->item(row,col)->data(FormulaSourceRole).toString() : QString();
+            value.replace('"',"\"\"");
+            if (value.contains(';') || value.contains('"') || value.contains('\n')) value='"'+value+'"';
+            values<<value;
+        }
+        out<<values.join(';')<<'\n';
+    }
+    csv.close();
+    QProcess process;
+    process.start(soffice, {"-env:UserInstallation=" + QUrl::fromLocalFile(temp.filePath("profile")).toString(),
+        "--headless", "--convert-to", "xlsx", "--outdir", temp.path(), csvPath});
+    if (!process.waitForStarted(5000) || !process.waitForFinished(60000) || process.exitCode()!=0) {
+        QMessageBox::warning(this,"Export XLSX",QString::fromLocal8Bit(process.readAllStandardError())); return;
+    }
+    const QString generated=temp.filePath("NexusSheets.xlsx");
+    if (!QFileInfo::exists(generated) || !QFile::copy(generated,path)) {
+        QMessageBox::warning(this,"Export XLSX","Le fichier XLSX n'a pas pu être créé à cet emplacement."); return;
+    }
+    status_->setText("Export XLSX terminé (feuille active) : "+QFileInfo(path).fileName());
+}
+
+void SheetPage::sortByCurrentColumn()
+{
+    const int column=table_->currentColumn();
+    if (column<0) { QMessageBox::information(this,"Tri","Sélectionnez une colonne à trier."); return; }
+    table_->setSortingEnabled(true);
+    table_->sortItems(column, Qt::AscendingOrder);
+    status_->setText("Tri croissant appliqué à la colonne sélectionnée.");
+}
+
+void SheetPage::filterRows()
+{
+    const int column=table_->currentColumn();
+    if (column<0) { QMessageBox::information(this,"Filtre","Sélectionnez une cellule dans la colonne à filtrer."); return; }
+    bool accepted=false;
+    const QString query=QInputDialog::getText(this,"Filtrer les lignes","Afficher les lignes contenant :",QLineEdit::Normal,QString(),&accepted);
+    if (!accepted) return;
+    for (int row=0;row<table_->rowCount();++row) {
+        const auto *item=table_->item(row,column);
+        const QString value=item?item->data(Qt::DisplayRole).toString():QString();
+        table_->setRowHidden(row,!value.contains(query,Qt::CaseInsensitive));
+    }
+    status_->setText("Filtre appliqué à la colonne sélectionnée.");
+}
+
+void SheetPage::clearFilter()
+{
+    for (int row=0;row<table_->rowCount();++row) table_->setRowHidden(row,false);
+    status_->setText("Filtre effacé.");
 }
 void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
