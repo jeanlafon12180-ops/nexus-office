@@ -243,9 +243,9 @@ void SlidesPage::importPptx()
     bool inPage=false; QString title,body; bool titleSeen=false;
     while(!xml.atEnd()){
         xml.readNext();
-        if(xml.isStartElement()&&xml.name()=="page"){
+        if(xml.isStartElement()&&xml.name().toString()=="page"){
             inPage=true;title.clear();body.clear();titleSeen=false;
-        } else if(inPage&&xml.isStartElement()&&xml.name()=="p"){
+        } else if(inPage&&xml.isStartElement()&&xml.name().toString()=="p"){
             const QString text=xml.readElementText();
             if(!titleSeen){title=text;titleSeen=true;}else{if(!body.isEmpty())body+="\n";body+=text;}
         } else if(xml.isEndElement()&&xml.name()=="page"&&inPage){
