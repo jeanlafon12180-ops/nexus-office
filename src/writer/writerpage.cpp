@@ -2,6 +2,11 @@
 
 #include <QAction>
 #include <QFile>
+#include <QSaveFile>
+#include <QInputDialog>
+#include <QKeySequence>
+#include <QPrinter>
+#include <QPrintDialog>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFont>
@@ -74,17 +79,18 @@ WriterPage::WriterPage(QWidget *parent)
     auto *newButton = new QPushButton("Nouveau", this);
     auto *openButton = new QPushButton("Ouvrir", this);
     auto *saveButton = new QPushButton("Enregistrer", this);
+    auto *pdfButton = new QPushButton("Exporter PDF", this);
     newButton->setObjectName("writerSecondary");
     openButton->setObjectName("writerSecondary");
     saveButton->setObjectName("writerPrimary");
     header->addWidget(newButton);
     header->addWidget(openButton);
     header->addWidget(saveButton);
+    header->addWidget(pdfButton);
     layout->addLayout(header);
 
     auto *notice = new QLabel(
-        "Version de démarrage : édition et enregistrement des fichiers .html et .txt. "
-        "La compatibilité Word (.docx) sera ajoutée avec le moteur de documents.",
+        "Rédigez et mettez en forme vos documents. Enregistrement HTML, TXT, Markdown et DOCX (via LibreOffice).",
         this);
     notice->setObjectName("writerNotice");
     notice->setWordWrap(true);
@@ -107,7 +113,11 @@ WriterPage::WriterPage(QWidget *parent)
     toolbar->addWidget(fontSize);
 
     toolbar->addSeparator();
-
+    auto *undoAction = toolbar->addAction("Annuler");
+    auto *redoAction = toolbar->addAction("Rétablir");
+    undoAction->setShortcut(QKeySequence::Undo);
+    redoAction->setShortcut(QKeySequence::Redo);
+    toolbar->addSeparator();
     auto *boldAction = toolbar->addAction("Gras");
     boldAction->setCheckable(true);
     boldAction->setToolTip("Mettre en gras");
@@ -147,6 +157,12 @@ WriterPage::WriterPage(QWidget *parent)
     connect(newButton, &QPushButton::clicked, this, &WriterPage::newDocument);
     connect(openButton, &QPushButton::clicked, this, &WriterPage::openDocument);
     connect(saveButton, &QPushButton::clicked, this, &WriterPage::saveDocument);
+    connect(pdfButton, &QPushButton::clicked, this, &WriterPage::exportPdf);
+    connect(undoAction, &QAction::triggered, editor_, &QTextEdit::undo);
+    connect(redoAction, &QAction::triggered, editor_, &QTextEdit::redo);
+    auto *findAction = toolbar->addAction("Rechercher");
+    findAction->setShortcut(QKeySequence::Find);
+    connect(findAction, &QAction::triggered, this, &WriterPage::findText);
 
     connect(fontFamily, &QFontComboBox::currentFontChanged,
             editor_, &QTextEdit::setCurrentFont);
@@ -271,6 +287,7 @@ void WriterPage::openDocument()
         QTextStream stream(&file);
         const QString contents = stream.readAll();
         if (suffix == "html" || suffix == "htm") editor_->setHtml(contents);
+        else if (suffix == "md" || suffix == "markdown") editor_->document()->setMarkdown(contents);
         else editor_->setPlainText(contents);
     }
     currentFile_ = path;
@@ -298,8 +315,8 @@ void WriterPage::saveDocumentAs()
         return;
 
     QString finalPath = path;
-    if (QFileInfo(finalPath).suffix().isEmpty())
-        finalPath += ".docx";
+    if (QFileInfo(finalPath).suffix().isEmpty()) {
+        const QString selected = QFileDialog::getSaveFileName; // placeholder
 
     if (saveToFile(finalPath)) {
         currentFile_ = finalPath;
@@ -335,8 +352,10 @@ bool WriterPage::saveToFile(const QString &path)
             QMessageBox::critical(this, "Enregistrement impossible", "LibreOffice n’a pas généré le fichier DOCX.");
             return false;
         }
-        if (QFile::exists(path)) QFile::remove(path);
-        if (!QFile::copy(generated, path)) {
+        QFile source(generated);
+        QSaveFile destination(path);
+        if (!source.open(QIODevice::ReadOnly) || !destination.open(QIODevice::WriteOnly) ||
+            destination.write(source.readAll()) < 0 || !destination.commit()) {
             QMessageBox::critical(this, "Enregistrement impossible", "Impossible d’enregistrer le fichier DOCX à cet emplacement.");
             return false;
         }
@@ -349,6 +368,7 @@ bool WriterPage::saveToFile(const QString &path)
         }
         QTextStream stream(&file);
         if (suffix == "html" || suffix == "htm") stream << editor_->toHtml();
+        else if (suffix == "md" || suffix == "markdown") stream << editor_->document()->toMarkdown();
         else stream << editor_->toPlainText();
         file.close();
     }
@@ -357,11 +377,36 @@ bool WriterPage::saveToFile(const QString &path)
     return true;
 }
 
+void WriterPage::findText()
+{
+    bool accepted = false;
+    const QString query = QInputDialog::getText(this, "Rechercher", "Texte à rechercher :", QLineEdit::Normal, QString(), &accepted);
+    if (!accepted || query.isEmpty()) return;
+    if (!editor_->find(query)) {
+        QTextCursor cursor = editor_->textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        editor_->setTextCursor(cursor);
+        if (!editor_->find(query)) QMessageBox::information(this, "Recherche", "Aucune occurrence trouvée.");
+    }
+}
+
+void WriterPage::exportPdf()
+{
+    QString path = QFileDialog::getSaveFileName(this, "Exporter en PDF", "Document.pdf", "Fichier PDF (*.pdf)");
+    if (path.isEmpty()) return;
+    if (QFileInfo(path).suffix().isEmpty()) path += ".pdf";
+    QPrinter printer(QPrinter::HighResolution);
+    printer.setOutputFormat(QPrinter::PdfFormat);
+    printer.setOutputFileName(path);
+    editor_->document()->print(&printer);
+}
+
 void WriterPage::updateDocumentInfo()
 {
     const int words = editor_->toPlainText()
         .split(QRegularExpression("\\s+"), Qt::SkipEmptyParts).size();
-    wordCountLabel_->setText(QString("%1 mot%2").arg(words).arg(words == 1 ? "" : "s"));
+    const int characters = editor_->toPlainText().size();
+    wordCountLabel_->setText(QString("%1 mot%2 · %3 caractères").arg(words).arg(words == 1 ? "" : "s").arg(characters));
     if (currentFile_.isEmpty() && !editor_->document()->isModified())
         documentLabel_->setText("Nouveau document");
 }
