@@ -21,11 +21,13 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 - [ ] Tester ouverture, modification et réenregistrement de DOCX variés
 - [ ] Améliorer la fidélité DOCX et préserver les éléments de mise en page
-- [ ] Ajouter tableaux, images, listes et styles de titres avancés
+- [x] Ajouter tableaux, insertion d’images, listes à puces/numérotées et styles de titres
 - [ ] Ajouter en-têtes, pieds de page, numéros de page et réglages de page
 - [ ] Ajouter correcteur orthographique et dictionnaire
-- [ ] Ajouter impression, aperçu avant impression et gestion des marges
-- [ ] Ajouter tests automatisés d'ouverture et d'enregistrement des formats
+- [x] Ajouter les boîtes de dialogue de mise en page et d’impression
+- [x] Ajouter l’export PDF
+- [ ] Valider le test automatisé de conversion DOCX aller-retour dans la CI
+- [ ] Ajouter des tests automatisés fonctionnels d’ouverture et d’enregistrement dans Writer
 
 ## Étape 2 — terminer Nexus Sheets
 
