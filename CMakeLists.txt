@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(NexusOffice
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "A modern cross-platform office suite"
     LANGUAGES CXX
 )
@@ -23,6 +23,9 @@ qt_add_executable(nexus-office
     src/main.cpp
     src/mainwindow.cpp
     src/mainwindow.h
+    src/document/documentengine.h
+    src/document/unavailabledocumentengine.h
+    src/document/unavailabledocumentengine.cpp
 )
 
 target_link_libraries(nexus-office PRIVATE Qt6::Widgets)
@@ -48,6 +51,17 @@ if(NEXUS_ENABLE_LIBREOFFICEKIT)
     target_include_directories(nexus-office PRIVATE ${LIBREOFFICEKIT_INCLUDE_DIR})
     target_link_libraries(nexus-office PRIVATE ${LIBREOFFICEKIT_LIBRARY})
     target_compile_definitions(nexus-office PRIVATE NEXUS_HAS_LIBREOFFICEKIT=1)
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(documentengine-tests
+        tests/documentengine_test.cpp
+        src/document/unavailabledocumentengine.cpp
+        src/document/documentengine.h
+        src/document/unavailabledocumentengine.h
+    )
+    add_test(NAME documentengine-contract COMMAND documentengine-tests)
 endif()
 
 set_target_properties(nexus-office PROPERTIES
