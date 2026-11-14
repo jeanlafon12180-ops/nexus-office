@@ -61,6 +61,10 @@ LibreOfficeKit is not required for this preview. The current application does no
 5. Add PDF viewing and export workflows.
 6. Package and test platform-specific installers.
 
+## Website preview
+
+A responsive static website is available in [`website/`](website/). Open [`website/index.html`](website/index.html) in a browser to preview it locally. The Windows, macOS, and Linux download controls are intentionally disabled until tested installers are published.
+
 ## Licensing
 
 Nexus Office's licensing model is not finalized. LibreOffice and its components have their own licenses and notices. See [docs/LICENSING.md](docs/LICENSING.md) before copying, modifying, linking, or redistributing third-party code.
