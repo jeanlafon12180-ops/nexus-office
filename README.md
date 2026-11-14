@@ -1,19 +1,19 @@
 # Nexus Office
 
-**A modern, cross-platform office suite built around LibreOffice technology.**
+**A modern, cross-platform office suite with a custom desktop experience.**
 
-Nexus Office aims to provide a clean, familiar productivity experience inspired by Microsoft Office, with its own visual identity.
+Nexus Office aims to provide a clean, familiar productivity experience inspired by Microsoft Office, with its own visual identity and an office engine based on LibreOffice technology.
 
-> **Project status:** Early development. No production-ready editor or installer is available yet.
+> **Project status: Early prototype (0.1.0).** The current code provides a Qt desktop shell with navigation, module landing pages, file selection dialogs, and light/dark themes. It does not yet edit or convert documents.
 
 ## Planned applications
 
-| App | Purpose | Status |
+| App | Purpose | Current status |
 | --- | --- | --- |
-| Nexus Writer | Word processing | Planned |
-| Nexus Sheets | Spreadsheets | Planned |
-| Nexus Slides | Presentations | Planned |
-| Nexus PDF | PDF viewing and workflows | Planned |
+| Nexus Writer | Word processing | Landing page only |
+| Nexus Sheets | Spreadsheets | Landing page only |
+| Nexus Slides | Presentations | Landing page only |
+| Nexus PDF | PDF workflows | Landing page only |
 
 ## Target platforms
 
@@ -21,48 +21,46 @@ Nexus Office aims to provide a clean, familiar productivity experience inspired 
 - Linux
 - macOS
 
-## Technology direction
+## Technology
 
-- **LibreOffice / LibreOfficeKit:** document engine and interoperability research
-- **C++ and Qt:** native desktop application and user interface
-- **CMake:** build configuration
+- **C++17**
+- **Qt 6 Widgets**
+- **CMake 3.21+**
+- **LibreOfficeKit:** planned document-engine integration; not connected yet
 
-The integration approach is being evaluated. The first milestone is a desktop shell; document editing will be integrated only after validating the relevant LibreOfficeKit APIs and platform requirements.
+## Build the desktop preview
 
-## Development
+Install a C++17 compiler, CMake 3.21 or newer, and Qt 6 with the Widgets module.
 
-Requirements for the initial desktop shell:
-
-- CMake 3.21 or newer
-- A C++17 compiler
-- Qt 6 Widgets
-
-Build:
+From the repository root:
 
 ```bash
 cmake -S . -B build
 cmake --build build
 ```
 
-Run the generated executable from the build directory. The exact executable path depends on the platform and generator.
+Run the generated `nexus-office` executable from the build directory. The exact path depends on your operating system and build generator.
 
-## Repository structure
+## Current features
 
-```text
-apps/             Application modules (planned)
-docs/             Architecture and project documentation
-src/              Initial desktop shell
-branding/         Brand assets (planned)
-```
+- Native Qt desktop window
+- Sidebar navigation between Home, Writer, Sheets, Slides, and PDF
+- Module landing pages
+- Light and dark themes
+- File picker for selecting a document (selection only; no document is opened or changed)
+
+## Next milestones
+
+1. Validate and improve the desktop shell on Windows, Linux, and macOS.
+2. Integrate LibreOfficeKit and verify document loading and editing.
+3. Add Writer, Sheets, and Slides workflows.
+4. Add PDF viewing and export workflows.
+5. Package and test platform-specific installers.
 
 ## Licensing
 
-Nexus Office's licensing model is not finalized. LibreOffice and its components have their own licenses and notices. See [docs/LICENSING.md](docs/LICENSING.md) before copying, modifying, linking, or redistributing any third-party code.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Nexus Office's licensing model is not finalized. LibreOffice and its components have their own licenses and notices. See [docs/LICENSING.md](docs/LICENSING.md) before copying, modifying, linking, or redistributing third-party code.
 
 ## Disclaimer
 
-Nexus Office is an independent project and is not affiliated with or endorsed by The Document Foundation or Microsoft. Product names are used only to describe compatibility goals or project plans.
+Nexus Office is an independent project and is not affiliated with or endorsed by The Document Foundation or Microsoft.
