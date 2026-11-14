@@ -55,7 +55,8 @@ QString SheetPage::cellValue(int row,int col,int depth) const {
         return "#REF!";
     const auto *item = table_->item(row, col);
     if (!item) return "0";
-    const QString raw = item->data(Qt::EditRole).toString().trimmed();
+    const QVariant storedSource = item->data(FormulaSourceRole);
+    const QString raw = (storedSource.isValid() ? storedSource.toString() : item->data(Qt::EditRole).toString()).trimmed();
     if (!raw.startsWith('=')) return raw.isEmpty() ? "0" : raw;
     return nexus::sheets::FormulaEngine::evaluate(raw, [this, depth](int refRow, int refColumn) {
         return cellValue(refRow, refColumn, depth + 1);
@@ -65,13 +66,25 @@ void SheetPage::recalculate(){
     table_->blockSignals(true);
     for(int r=0;r<table_->rowCount();++r)for(int c=0;c<table_->columnCount();++c){
         auto *it=table_->item(r,c); if(!it)continue;
-        const QString source = it->data(Qt::EditRole).toString();
+        const QString visible = it->data(Qt::DisplayRole).toString();
+        const QVariant storedSource = it->data(FormulaSourceRole);
+        const QVariant lastRendered = it->data(FormulaRenderedRole);
+        QString source = storedSource.isValid() ? storedSource.toString() : visible;
+        // DisplayRole and EditRole share the same Qt item role. Keep the
+        // original formula separately so showing a result never destroys it.
+        if (!storedSource.isValid() || (lastRendered.isValid() && visible != lastRendered.toString())) {
+            source = visible;
+            it->setData(FormulaSourceRole, source);
+        }
         if(source.trimmed().startsWith('=')) {
             const QString result = cellValue(r,c);
             it->setData(Qt::DisplayRole, result);
+            it->setData(FormulaRenderedRole, result);
             it->setToolTip("Formule : " + source + "\nRésultat : " + result);
         } else {
             it->setData(Qt::DisplayRole, source);
+            it->setData(FormulaRenderedRole, source);
+            it->setData(FormulaSourceRole, source);
             it->setToolTip(QString());
         }
     }
@@ -91,5 +104,5 @@ void SheetPage::openCsv(){
 void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
     QFile f(path);if(!f.open(QIODevice::WriteOnly|QIODevice::Text)){QMessageBox::warning(this,"Enregistrement impossible",f.errorString());return;}
-    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(Qt::EditRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());
+    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(FormulaSourceRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());
 }
