@@ -25,6 +25,12 @@ qt_add_executable(nexus-office
     src/mainwindow.h
     src/writer/writerpage.cpp
     src/writer/writerpage.h
+    src/sheets/sheetpage.cpp
+    src/sheets/sheetpage.h
+    src/slides/slidespage.cpp
+    src/slides/slidespage.h
+    src/pdf/pdfpage.cpp
+    src/pdf/pdfpage.h
     src/document/documentengine.h
     src/document/unavailabledocumentengine.h
     src/document/unavailabledocumentengine.cpp
