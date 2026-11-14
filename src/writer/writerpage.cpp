@@ -11,8 +11,10 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSpinBox>
 #include <QTextEdit>
+#include <QTextDocument>
 #include <QTextStream>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -251,8 +253,10 @@ void WriterPage::saveDocumentAs()
     if (QFileInfo(finalPath).suffix().isEmpty())
         finalPath += ".html";
 
-    if (saveToFile(finalPath))
+    if (saveToFile(finalPath)) {
         currentFile_ = finalPath;
+        updateDocumentInfo();
+    }
 }
 
 bool WriterPage::saveToFile(const QString &path)
