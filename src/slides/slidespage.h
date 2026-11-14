@@ -21,6 +21,8 @@ private:
     void addSlide();
     void removeSlide();
     void insertImage();
+    void insertTable();
+    void insertShape();
     void applyTheme();
     void exportPdf();
 };
