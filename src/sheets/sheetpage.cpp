@@ -15,6 +15,12 @@
 #include <QSet>
 #include <functional>
 
+namespace {
+constexpr int FormulaSourceRole = Qt::UserRole;
+constexpr int FormulaRenderedRole = Qt::UserRole + 1;
+}
+
+
 SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     auto *root = new QVBoxLayout(this);
     root->setContentsMargins(28,24,28,24);
