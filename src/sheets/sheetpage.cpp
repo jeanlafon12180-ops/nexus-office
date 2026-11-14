@@ -51,7 +51,7 @@ void SheetPage::addColumn(){table_->insertColumn(table_->columnCount());}
 QString SheetPage::cellValue(int row,int col,int depth) const {
     if(depth>20 || row<0 || col<0 || row>=table_->rowCount() || col>=table_->columnCount()) return "0";
     auto *item=table_->item(row,col); if(!item) return "0";
-    QString raw=item->text().trimmed(); if(!raw.startsWith('=')) return raw;
+    QString raw=item->data(Qt::EditRole).toString().trimmed(); if(!raw.startsWith('=')) return raw;
     raw=raw.mid(1).trimmed();
     auto colIndex=[](const QString &letters){int n=0;for(QChar ch:letters.toUpper()){if(!ch.isLetter())return -1;n=n*26+ch.unicode()-QChar('A').unicode()+1;}return n-1;};
     QRegularExpression sum("^SUM\\(([A-Z]+)([0-9]+):([A-Z]+)([0-9]+)\\)$",QRegularExpression::CaseInsensitiveOption);
@@ -77,8 +77,15 @@ void SheetPage::recalculate(){
     table_->blockSignals(true);
     for(int r=0;r<table_->rowCount();++r)for(int c=0;c<table_->columnCount();++c){
         auto *it=table_->item(r,c); if(!it)continue;
-        if(it->text().startsWith('=')){it->setToolTip("Résultat : "+cellValue(r,c));}
-        else it->setToolTip(QString());
+        const QString source = it->data(Qt::EditRole).toString();
+        if(source.trimmed().startsWith('=')) {
+            const QString result = cellValue(r,c);
+            it->setData(Qt::DisplayRole, result);
+            it->setToolTip("Formule : " + source + "\nRésultat : " + result);
+        } else {
+            it->setData(Qt::DisplayRole, source);
+            it->setToolTip(QString());
+        }
     }
     table_->blockSignals(false);
     status_->setText("Tableau modifié · les formules s’affichent dans l’infobulle des cellules");
@@ -96,5 +103,5 @@ void SheetPage::openCsv(){
 void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
     QFile f(path);if(!f.open(QIODevice::WriteOnly|QIODevice::Text)){QMessageBox::warning(this,"Enregistrement impossible",f.errorString());return;}
-    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->text():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());
+    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(Qt::EditRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());
 }
