@@ -1,5 +1,8 @@
 #include "mainwindow.h"
-#include "writer/writerpage.h"\n#include "sheets/sheetpage.h"\n#include "slides/slidespage.h"\n#include "pdf/pdfpage.h"
+#include "writer/writerpage.h"
+#include "sheets/sheetpage.h"
+#include "slides/slidespage.h"
+#include "pdf/pdfpage.h"
 
 #include <QFileDialog>
 #include <QFrame>
