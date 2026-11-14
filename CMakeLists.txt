@@ -70,6 +70,12 @@ if(BUILD_TESTING)
         src/document/unavailabledocumentengine.h
     )
     add_test(NAME documentengine-contract COMMAND documentengine-tests)
+
+    find_program(LIBREOFFICE_EXECUTABLE NAMES soffice)
+    if(LIBREOFFICE_EXECUTABLE)
+        add_test(NAME writer-docx-roundtrip
+            COMMAND bash ${CMAKE_SOURCE_DIR}/tests/writer_docx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE})
+    endif()
 endif()
 
 set_target_properties(nexus-office PROPERTIES
