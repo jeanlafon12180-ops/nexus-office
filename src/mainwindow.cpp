@@ -77,8 +77,6 @@ MainWindow::MainWindow(QWidget *parent)
         if (i == 0)
             button->setChecked(true);
 
-        if (i == 0)
-            pages->addWidget(nullptr);
     }
 
     // Build the dashboard and module landing pages.
@@ -179,10 +177,6 @@ MainWindow::MainWindow(QWidget *parent)
     pages->addWidget(buildModule("Nexus Slides", "A canvas for presentations."));
     pages->addWidget(buildModule("Nexus PDF", "A home for PDF documents and workflows."));
 
-    // Remove the temporary null page inserted while the navigation was created.
-    QWidget *temporaryPage = pages->widget(0);
-    if (temporaryPage == nullptr)
-        pages->removeWidget(temporaryPage);
 
     sideLayout->addStretch();
 
