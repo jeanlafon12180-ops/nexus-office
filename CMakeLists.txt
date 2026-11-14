@@ -77,15 +77,16 @@ if(BUILD_TESTING)
     target_link_libraries(formulaengine-tests PRIVATE Qt6::Core)
     add_test(NAME sheets-formula-engine COMMAND formulaengine-tests)
 
+    find_package(Python3 COMPONENTS Interpreter QUIET)
     find_program(LIBREOFFICE_EXECUTABLE NAMES soffice)
     if(LIBREOFFICE_EXECUTABLE)
         add_test(NAME writer-docx-roundtrip
             COMMAND bash ${CMAKE_SOURCE_DIR}/tests/writer_docx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE})
     endif()
 
-    if(LIBREOFFICE_EXECUTABLE)
+    if(LIBREOFFICE_EXECUTABLE AND Python3_Interpreter_FOUND)
         add_test(NAME slides-pptx-roundtrip
-            COMMAND bash ${CMAKE_SOURCE_DIR}/tests/slides_pptx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE})
+            COMMAND bash ${CMAKE_SOURCE_DIR}/tests/slides_pptx_roundtrip.sh ${LIBREOFFICE_EXECUTABLE} ${Python3_EXECUTABLE})
     endif()
 endif()
 
