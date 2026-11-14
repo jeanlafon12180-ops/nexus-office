@@ -1,38 +1,29 @@
 # Nexus Office
 
-**A modern, cross-platform office suite with a custom desktop experience.**
+**Suite bureautique de bureau multiplateforme — prototype 0.2.0.**
 
-Nexus Office aims to provide a clean, familiar productivity experience inspired by Microsoft Office, with its own visual identity and an office engine based on LibreOffice technology.
+Nexus Office est une application Qt pour Windows et Linux (macOS prévu). Elle regroupe plusieurs outils dans une interface unique.
 
-> **Project status: Early prototype (0.2.0).** The Qt desktop shell is in place. This release adds the first Nexus-owned document-engine interface and a safe placeholder backend. Real document loading, editing, and conversion are not implemented yet.
+## Modules disponibles
 
-## Planned applications
+| Module | Fonctionnalités actuelles | Limites |
+|---|---|---|
+| **Nexus Writer** | Édition riche, mise en forme, TXT, HTML, Markdown, ouverture/export DOCX via LibreOffice | LibreOffice doit être installé pour DOCX ; fidélité de mise en page à tester |
+| **Nexus Sheets** | Grille éditable, import/export CSV, ajout de lignes/colonnes, formules simples | Pas de fichiers XLSX natifs ; formules limitées |
+| **Nexus Slides** | Création d'une diapositive titre/contenu, export PDF | Pas encore de gestion multi-diapositives ni de PPTX |
+| **Nexus PDF** | Ouvre un PDF avec le lecteur par défaut du système | Pas de lecteur PDF intégré ni d'édition/annotation |
 
-| App | Purpose | Current status |
-| --- | --- | --- |
-| Nexus Writer | Word processing | Landing page only |
-| Nexus Sheets | Spreadsheets | Landing page only |
-| Nexus Slides | Presentations | Landing page only |
-| Nexus PDF | PDF workflows | Landing page only |
+## Formules Sheets prises en charge
 
-## Target platforms
+- Références de cellules dans des opérations simples : `=A1+B1`, `=A1*B1`
+- Opérations numériques directes : `=12*3`
+- Somme d'une plage : `=SUM(A1:B4)`
 
-- Windows
-- Linux
-- macOS
+Le résultat d'une formule est visible dans l'infobulle de la cellule. Les formules ne constituent pas encore un moteur de calcul complet.
 
-## Technology
+## Développement
 
-- **C++17**
-- **Qt 6 Widgets**
-- **CMake 3.21+**
-- **LibreOfficeKit:** planned document-engine backend; not connected yet
-
-## Build the desktop preview
-
-Install a C++17 compiler, CMake 3.21 or newer, and Qt 6 with the Widgets module.
-
-From the repository root:
+Technologies : C++17, Qt 6 Widgets, CMake 3.21+, Qt PrintSupport.
 
 ```bash
 cmake -S . -B build
@@ -40,35 +31,16 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-Run the generated `nexus-office` executable from the build directory. The exact path depends on your operating system and build generator.
+Pour DOCX, installez LibreOffice et assurez-vous que son exécutable `soffice` est accessible dans le PATH (ou installé dans son emplacement standard sous Windows/macOS).
 
-LibreOfficeKit is not required for this preview. The current application does not call its API. See [the integration plan](docs/LIBREOFFICEKIT-INTEGRATION.md).
+## Plateformes et distribution
 
-## Current foundations
+Le workflow GitHub Actions construit et teste les versions Linux et Windows, puis prépare un installateur Windows Inno Setup et une archive portable. Les artefacts se téléchargent depuis l'onglet Actions du dépôt.
 
-- Native Qt desktop window with navigation and light/dark themes
-- Nexus-owned `DocumentEngine` interface, separated from the UI
-- Explicit unavailable backend that refuses document operations instead of pretending they succeeded
-- Automated contract test for the unavailable backend
-- File picker in the UI is selection-only; no document is opened or changed
+## État du projet
 
-## Next milestones
+Nexus Office reste un prototype fonctionnel avec des fonctionnalités limitées. Il ne remplace pas encore Microsoft Office ou LibreOffice et ne doit pas être présenté comme pleinement compatible avec DOCX, XLSX ou PPTX.
 
-1. Validate and improve the desktop shell on Windows, Linux, and macOS.
-2. Verify LibreOfficeKit headers, runtime dependencies, API, and licensing on each platform.
-3. Implement and test the LibreOfficeKit backend for document loading and rendering.
-4. Add Writer, Sheets, and Slides workflows.
-5. Add PDF viewing and export workflows.
-6. Package and test platform-specific installers.
+## Licence et marques
 
-## Website preview
-
-A responsive static website is available in [`website/`](website/). Open [`website/index.html`](website/index.html) in a browser to preview it locally. The Windows, macOS, and Linux download controls are intentionally disabled until tested installers are published.
-
-## Licensing
-
-Nexus Office's licensing model is not finalized. LibreOffice and its components have their own licenses and notices. See [docs/LICENSING.md](docs/LICENSING.md) before copying, modifying, linking, or redistributing third-party code.
-
-## Disclaimer
-
-Nexus Office is an independent project and is not affiliated with or endorsed by The Document Foundation or Microsoft.
+Le modèle de licence du projet est à finaliser. Les composants tiers conservent leurs licences respectives. Nexus Office est un projet indépendant, non affilié à Microsoft ni à The Document Foundation.
