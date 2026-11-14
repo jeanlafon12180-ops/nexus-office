@@ -27,4 +27,6 @@ private:
     void openDocument();
     void saveDocument();
     void saveDocumentAs();
+    void findText();
+    void exportPdf();
 };
