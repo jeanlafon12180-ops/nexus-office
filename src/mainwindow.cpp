@@ -51,19 +51,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto *brand = makeLabel("NEXUS OFFICE", "brand", sidebar);
     sideLayout->addWidget(brand);
-    sideLayout->addWidget(makeLabel("Your workspace. One suite.", "sidebarMuted", sidebar));
+    sideLayout->addWidget(makeLabel("Votre espace de travail. Une suite.", "sidebarMuted", sidebar));
     sideLayout->addSpacing(28);
     sideLayout->addWidget(makeLabel("WORKSPACE", "sidebarSection", sidebar));
 
     pages = new QStackedWidget(central);
 
-    const QStringList names = {"Home", "Writer", "Sheets", "Slides", "PDF"};
+    const QStringList names = {"Accueil", "Writer", "Sheets", "Slides", "PDF"};
     const QStringList descriptions = {
-        "Your workspace overview",
-        "Create and edit text documents",
-        "Organize data and calculations",
-        "Build presentations",
-        "View and manage PDF files"
+        "Vue d’ensemble de votre espace de travail",
+        "Créer et modifier des documents texte",
+        "Organiser les données et effectuer des calculs",
+        "Créer des présentations",
+        "Consulter et gérer les fichiers PDF"
     };
 
     for (int i = 0; i < names.size(); ++i) {
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(button, &QPushButton::clicked, this, [this, i]() {
             pages->setCurrentIndex(i);
             for (auto *nav : findChildren<QPushButton *>("navButton"))
-                nav->setChecked(nav->text() == QStringList{"Home", "Writer", "Sheets", "Slides", "PDF"}.at(i));
+                nav->setChecked(nav->text() == QStringList{"Accueil", "Writer", "Sheets", "Slides", "PDF"}.at(i));
         });
 
         if (i == 0)
@@ -88,10 +88,10 @@ MainWindow::MainWindow(QWidget *parent)
         layout->setContentsMargins(42, 38, 42, 38);
         layout->setSpacing(16);
 
-        layout->addWidget(makeLabel("Good day.", "pageHeading", page));
-        layout->addWidget(makeLabel("Everything you need to get work done.", "muted", page));
+        layout->addWidget(makeLabel("Bonjour !", "pageHeading", page));
+        layout->addWidget(makeLabel("Tout ce qu’il vous faut pour travailler.", "muted", page));
         layout->addSpacing(20);
-        layout->addWidget(makeLabel("Your workspace", "sectionHeading", page));
+        layout->addWidget(makeLabel("Votre espace de travail", "sectionHeading", page));
 
         const QStringList modules = {"Writer", "Sheets", "Slides", "PDF"};
         const QStringList summaries = {
@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent)
             textColumn->addWidget(makeLabel(summaries.at(i), "muted", card));
             cardLayout->addLayout(textColumn, 1);
 
-            auto *open = makeButton("Explore", "secondaryButton", card);
+            auto *open = makeButton("Ouvrir", "secondaryButton", card);
             cardLayout->addWidget(open);
             connect(open, &QPushButton::clicked, this, [this, i]() {
                 pages->setCurrentIndex(i + 1);
@@ -145,7 +145,7 @@ MainWindow::MainWindow(QWidget *parent)
         status->setObjectName("modulePanel");
         auto *statusLayout = new QVBoxLayout(status);
         statusLayout->setContentsMargins(22, 22, 22, 22);
-        statusLayout->addWidget(makeLabel("This workspace is being built", "cardTitle", status));
+        statusLayout->addWidget(makeLabel("Cet espace est en cours de développement", "cardTitle", status));
         auto *detail = makeLabel(
             "The interface is ready for the next development milestone. "
             "The document engine is not connected yet, so files cannot be edited in this preview.",
@@ -154,7 +154,7 @@ MainWindow::MainWindow(QWidget *parent)
         statusLayout->addWidget(detail);
         layout->addWidget(status);
 
-        auto *chooseFile = makeButton("Choose a file…", "primaryButton", page);
+        auto *chooseFile = makeButton("Choisir un fichier…", "primaryButton", page);
         layout->addWidget(chooseFile, 0, Qt::AlignLeft);
         connect(chooseFile, &QPushButton::clicked, this, [this, name]() {
             const QString file = QFileDialog::getOpenFileName(
@@ -162,7 +162,7 @@ MainWindow::MainWindow(QWidget *parent)
                 "Office documents (*.odt *.ods *.odp *.docx *.xlsx *.pptx *.pdf);;All files (*)");
             if (!file.isEmpty()) {
                 QMessageBox::information(
-                    this, "File selected",
+                    this, "Fichier sélectionné",
                     "Selected file:\n" + file +
                     "\n\nThe document engine is not integrated yet. "
                     "This file has not been opened or modified.");
@@ -175,20 +175,20 @@ MainWindow::MainWindow(QWidget *parent)
 
     pages->addWidget(buildHome());
     pages->addWidget(new WriterPage);
-    pages->addWidget(buildModule("Nexus Sheets", "A workspace for spreadsheets and calculations."));
-    pages->addWidget(buildModule("Nexus Slides", "A canvas for presentations."));
-    pages->addWidget(buildModule("Nexus PDF", "A home for PDF documents and workflows."));
+    pages->addWidget(buildModule("Nexus Sheets", "Un espace pour les feuilles de calcul et les formules."));
+    pages->addWidget(buildModule("Nexus Slides", "Un espace pour créer des présentations."));
+    pages->addWidget(buildModule("Nexus PDF", "Un espace pour consulter et gérer vos PDF."));
 
 
     sideLayout->addStretch();
 
-    auto *themeButton = makeButton("Switch to dark mode", "themeButton", sidebar);
+    auto *themeButton = makeButton("Passer en mode sombre", "themeButton", sidebar);
     sideLayout->addWidget(themeButton);
-    sideLayout->addWidget(makeLabel("Nexus Office · Preview 0.1.0", "sidebarMuted", sidebar));
+    sideLayout->addWidget(makeLabel("Nexus Office · Aperçu 0.2.0", "sidebarMuted", sidebar));
     connect(themeButton, &QPushButton::clicked, this, [this, themeButton]() {
         const bool dark = property("darkMode").toBool();
         applyTheme(!dark);
-        themeButton->setText(dark ? "Switch to dark mode" : "Switch to light mode");
+        themeButton->setText(dark ? "Passer en mode sombre" : "Passer en mode clair");
     });
 
     root->addWidget(sidebar);
@@ -203,7 +203,7 @@ void MainWindow::applyTheme(bool dark)
 
     if (dark) {
         setStyleSheet(R"(
-            QMainWindow, QWidget { background: #111827; color: #e5e7eb; }
+            QMainWindow, QWidget { background: #111827; color: #e5e7eb; }\n            QLabel { background: transparent; border: 0; }
             QWidget#sidebar { background: #0b1220; }
             QLabel#brand { color: #ffffff; font-size: 19px; font-weight: 800; letter-spacing: 1px; }
             QLabel#sidebarMuted { color: #8793a8; font-size: 11px; }
@@ -236,7 +236,7 @@ void MainWindow::applyTheme(bool dark)
         )");
     } else {
         setStyleSheet(R"(
-            QMainWindow, QWidget { background: #f5f7fb; color: #172033; }
+            QMainWindow, QWidget { background: #f5f7fb; color: #172033; }\n            QLabel { background: transparent; border: 0; }
             QWidget#sidebar { background: #111827; color: #f9fafb; }
             QLabel#brand { color: #ffffff; font-size: 19px; font-weight: 800; letter-spacing: 1px; }
             QLabel#sidebarMuted { color: #8b95a7; font-size: 11px; }
