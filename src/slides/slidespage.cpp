@@ -14,6 +14,9 @@
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QTextImageFormat>
+#include <QTextTable>
+#include <QTextTableFormat>
+#include <QInputDialog>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
@@ -32,6 +35,8 @@ SlidesPage::SlidesPage(QWidget *parent) : QWidget(parent)
     addButton("Nouvelle diapositive",[this]{addSlide();});
     addButton("Supprimer",[this]{removeSlide();});
     addButton("Insérer une image",[this]{insertImage();});
+    addButton("Insérer un tableau",[this]{insertTable();});
+    addButton("Insérer une forme",[this]{insertShape();});
     addButton("Exporter PDF",[this]{exportPdf();});
     root->addLayout(bar);
     auto *options=new QHBoxLayout;
@@ -80,6 +85,52 @@ void SlidesPage::insertImage()
     QTextImageFormat image; image.setName(path); image.setWidth(420);
     QTextCursor cursor=slide->body->textCursor(); cursor.insertBlock(); cursor.insertImage(image);
     slide->body->setTextCursor(cursor); status_->setText("Image insérée : "+QFileInfo(path).fileName());
+}
+void SlidesPage::insertTable()
+{
+    Slide *slide=currentSlide();
+    if(!slide)return;
+    bool rowsOk=false,columnsOk=false;
+    const int rows=QInputDialog::getInt(this,"Insérer un tableau","Nombre de lignes :",3,1,20,1,&rowsOk);
+    if(!rowsOk)return;
+    const int columns=QInputDialog::getInt(this,"Insérer un tableau","Nombre de colonnes :",3,1,12,1,&columnsOk);
+    if(!columnsOk)return;
+    QTextTableFormat format;
+    format.setBorder(1);
+    format.setCellPadding(6);
+    format.setCellSpacing(0);
+    format.setHeaderRowCount(1);
+    QTextCursor cursor=slide->body->textCursor();
+    cursor.insertBlock();
+    QTextTable *table=cursor.insertTable(rows,columns,format);
+    for(int row=0;row<rows;++row){
+        for(int column=0;column<columns;++column){
+            QTextTableCell cell=table->cellAt(row,column);
+            QTextCursor cellCursor=cell.firstCursorPosition();
+            cellCursor.insertText(row==0 ? "En-tête" : "Texte");
+        }
+    }
+    slide->body->setTextCursor(table->lastCursorPosition());
+    status_->setText("Tableau ajouté à la diapositive.");
+}
+void SlidesPage::insertShape()
+{
+    Slide *slide=currentSlide();
+    if(!slide)return;
+    const QStringList shapes={"Encadré","Bandeau","Citation"};
+    bool accepted=false;
+    const QString choice=QInputDialog::getItem(this,"Insérer une forme","Type de bloc :",shapes,0,false,&accepted);
+    if(!accepted)return;
+    const QString text=QInputDialog::getText(this,"Texte de la forme","Contenu :");
+    QString style="display:block;padding:18px;margin:12px 0;border:2px solid #2457b8;border-radius:12px;";
+    if(choice=="Bandeau")style+="background-color:#eaf1ff;font-weight:bold;text-align:center;";
+    else if(choice=="Citation")style+="border-left:6px solid #2457b8;font-style:italic;";
+    else style+="background-color:#f4f7fb;";
+    QTextCursor cursor=slide->body->textCursor();
+    cursor.insertBlock();
+    cursor.insertHtml(QString("<div style='%1'>%2</div>").arg(style,text.toHtmlEscaped()));
+    cursor.insertBlock();
+    status_->setText(choice+" ajouté à la diapositive.");
 }
 void SlidesPage::applyTheme()
 {
