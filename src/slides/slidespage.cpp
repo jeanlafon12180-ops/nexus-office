@@ -18,6 +18,8 @@
 #include <QTextTableFormat>
 #include <QInputDialog>
 #include <QPropertyAnimation>
+#include <QAbstractAnimation>
+#include <QUrl>
 #include <QGraphicsOpacityEffect>
 #include <QStackedWidget>
 #include <QDialog>
