@@ -163,12 +163,9 @@ MainWindow::MainWindow(QWidget *parent)
             if (!file.isEmpty()) {
                 QMessageBox::information(
                     this, "Fichier sélectionné",
-                    "Selected file:
-" + file +
-                    "
-
-The document engine is not integrated yet. "
-                    "This file has not been opened or modified.");
+                    "Fichier sélectionné :\\n" + file +
+                    "\\n\\nCe module n’est pas encore opérationnel. "
+                    "Le fichier n’a pas été ouvert ni modifié.");
             }
         });
 
