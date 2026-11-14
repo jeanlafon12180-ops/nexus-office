@@ -23,6 +23,9 @@
 #include <QLineEdit>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QVector>
+#include <QPair>
+#include <QPaintEvent>
 #include <QTableWidgetSelectionRange>
 #include <functional>
 
@@ -55,7 +58,7 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     add("Effacer filtre", [this]{clearFilter();});
     add("Graphique", [this]{showChart();});
     root->addLayout(top);
-    auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules : +, -, *, /, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX, COUNT sur une plage.",this);
+    auto *hint = new QLabel("Tableur : feuilles multiples, CSV et XLSX (feuille active), tri, filtres et aperçu de graphiques. Formules : +, -, *, /, parenthèses, références de cellules et SUM, AVERAGE, MIN, MAX, COUNT.",this);
     hint->setWordWrap(true); hint->setStyleSheet("color:#52627a;background:transparent");
     root->addWidget(hint);
     tabs_ = new QTabWidget(this);
