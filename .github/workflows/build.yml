@@ -86,7 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: NexusOffice-Windows-Installer
-          path: NexusOffice-Setup-0.2.0-x64.exe
+          path: installer-output/NexusOffice-Setup-0.2.0-x64.exe
           if-no-files-found: error
           retention-days: 30
 
