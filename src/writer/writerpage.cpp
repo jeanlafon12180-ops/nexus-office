@@ -10,7 +10,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
-#include <QPushButton>
+#include <QPushButton>\n#include <QProcess>\n#include <QStandardPaths>\n#include <QTemporaryDir>\n#include <QDir>
 #include <QRegularExpression>
 #include <QSpinBox>
 #include <QTextEdit>
@@ -19,7 +19,42 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-WriterPage::WriterPage(QWidget *parent)
+
+namespace {
+QString findSoffice()
+{
+    QString exe = QStandardPaths::findExecutable("soffice");
+#ifdef Q_OS_WIN
+    if (exe.isEmpty() && QFileInfo::exists("C:/Program Files/LibreOffice/program/soffice.exe"))
+        exe = "C:/Program Files/LibreOffice/program/soffice.exe";
+    if (exe.isEmpty() && QFileInfo::exists("C:/Program Files (x86)/LibreOffice/program/soffice.exe"))
+        exe = "C:/Program Files (x86)/LibreOffice/program/soffice.exe";
+#elif defined(Q_OS_MACOS)
+    if (exe.isEmpty() && QFileInfo::exists("/Applications/LibreOffice.app/Contents/MacOS/soffice"))
+        exe = "/Applications/LibreOffice.app/Contents/MacOS/soffice";
+#endif
+    return exe;
+}
+bool convertWithLibreOffice(const QStringList &args, QString *error)
+{
+    const QString exe = findSoffice();
+    if (exe.isEmpty()) {
+        *error = "LibreOffice est introuvable. Installez-le pour utiliser les fichiers DOCX.";
+        return false;
+    }
+    QProcess p;
+    p.start(exe, args);
+    if (!p.waitForStarted(10000) || !p.waitForFinished(120000) ||
+        p.exitStatus() != QProcess::NormalExit || p.exitCode() != 0) {
+        if (p.state() != QProcess::NotRunning) { p.kill(); p.waitForFinished(); }
+        *error = QString::fromLocal8Bit(p.readAllStandardError()).trimmed();
+        if (error->isEmpty()) *error = "La conversion LibreOffice a échoué.";
+        return false;
+    }
+    return true;
+}
+}
+\nWriterPage::WriterPage(QWidget *parent)
     : QWidget(parent)
 {
     auto *layout = new QVBoxLayout(this);
@@ -143,7 +178,7 @@ WriterPage::WriterPage(QWidget *parent)
             });
 
     setStyleSheet(R"(
-        QLabel#writerHeading { font-size: 27px; font-weight: 750; color: #172033; }
+        QLabel { background: transparent; border: 0; }\n        QLabel#writerHeading { font-size: 27px; font-weight: 750; color: #172033; }
         QLabel#writerNotice {
             background: #eaf1ff; color: #294b82;
             border: 1px solid #d5e2ff; border-radius: 8px; padding: 10px 12px;
@@ -198,33 +233,39 @@ void WriterPage::newDocument()
 
 void WriterPage::openDocument()
 {
-    if (!maybeSave())
-        return;
-
+    if (!maybeSave()) return;
     const QString path = QFileDialog::getOpenFileName(
         this, "Ouvrir un document", QString(),
-        "Documents Nexus Writer (*.html *.htm *.txt *.md);;"
-        "Documents HTML (*.html *.htm);;Fichiers texte (*.txt *.md)");
-
-    if (path.isEmpty())
-        return;
-
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Ouverture impossible",
-                              "Le fichier n'a pas pu être ouvert :\n" + file.errorString());
-        return;
-    }
-
-    QTextStream stream(&file);
-    const QString contents = stream.readAll();
+        "Documents (*.docx *.html *.htm *.txt *.md);;Documents Word (*.docx);;Documents HTML (*.html *.htm);;Fichiers texte (*.txt *.md)");
+    if (path.isEmpty()) return;
     const QString suffix = QFileInfo(path).suffix().toLower();
-
-    if (suffix == "html" || suffix == "htm")
-        editor_->setHtml(contents);
-    else
-        editor_->setPlainText(contents);
-
+    if (suffix == "docx") {
+        QTemporaryDir temp;
+        QString error;
+        if (!temp.isValid() || !convertWithLibreOffice(
+                {"--headless", "--convert-to", "html", "--outdir", temp.path(), path}, &error)) {
+            QMessageBox::critical(this, "Ouverture DOCX impossible",
+                error.isEmpty() ? "Impossible de créer un dossier temporaire." : error);
+            return;
+        }
+        QFile converted(temp.filePath(QFileInfo(path).completeBaseName() + ".html"));
+        if (!converted.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Ouverture impossible", "LibreOffice n’a pas généré le document converti.");
+            return;
+        }
+        QTextStream stream(&converted);
+        editor_->setHtml(stream.readAll());
+    } else {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Ouverture impossible", "Le fichier n’a pas pu être ouvert :\\n" + file.errorString());
+            return;
+        }
+        QTextStream stream(&file);
+        const QString contents = stream.readAll();
+        if (suffix == "html" || suffix == "htm") editor_->setHtml(contents);
+        else editor_->setPlainText(contents);
+    }
     currentFile_ = path;
     editor_->document()->setModified(false);
     updateDocumentInfo();
@@ -244,14 +285,14 @@ void WriterPage::saveDocumentAs()
     const QString path = QFileDialog::getSaveFileName(
         this, "Enregistrer le document", currentFile_.isEmpty()
             ? "Document sans titre.html" : currentFile_,
-        "Document HTML (*.html);;Fichier texte (*.txt);;Markdown (*.md)");
+        "Document Word (*.docx);;Document HTML (*.html);;Fichier texte (*.txt);;Markdown (*.md)");
 
     if (path.isEmpty())
         return;
 
     QString finalPath = path;
     if (QFileInfo(finalPath).suffix().isEmpty())
-        finalPath += ".html";
+        finalPath += ".docx";
 
     if (saveToFile(finalPath)) {
         currentFile_ = finalPath;
@@ -261,21 +302,48 @@ void WriterPage::saveDocumentAs()
 
 bool WriterPage::saveToFile(const QString &path)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Enregistrement impossible",
-                              "Le fichier n'a pas pu être enregistré :\n" + file.errorString());
-        return false;
-    }
-
-    QTextStream stream(&file);
     const QString suffix = QFileInfo(path).suffix().toLower();
-    if (suffix == "html" || suffix == "htm")
+    if (suffix == "docx") {
+        QTemporaryDir temp;
+        if (!temp.isValid()) {
+            QMessageBox::critical(this, "Enregistrement impossible", "Impossible de créer un dossier temporaire.");
+            return false;
+        }
+        const QString htmlPath = temp.filePath("NexusDocument.html");
+        QFile html(htmlPath);
+        if (!html.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Enregistrement impossible", "Impossible de préparer le document.");
+            return false;
+        }
+        QTextStream stream(&html);
         stream << editor_->toHtml();
-    else
-        stream << editor_->toPlainText();
-
-    file.close();
+        html.close();
+        QString error;
+        if (!convertWithLibreOffice({"--headless", "--convert-to", "docx", "--outdir", temp.path(), htmlPath}, &error)) {
+            QMessageBox::critical(this, "Enregistrement DOCX impossible", error);
+            return false;
+        }
+        const QString generated = temp.filePath("NexusDocument.docx");
+        if (!QFileInfo::exists(generated)) {
+            QMessageBox::critical(this, "Enregistrement impossible", "LibreOffice n’a pas généré le fichier DOCX.");
+            return false;
+        }
+        if (QFile::exists(path)) QFile::remove(path);
+        if (!QFile::copy(generated, path)) {
+            QMessageBox::critical(this, "Enregistrement impossible", "Impossible d’enregistrer le fichier DOCX à cet emplacement.");
+            return false;
+        }
+    } else {
+        QFile file(path);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::critical(this, "Enregistrement impossible", "Le fichier n’a pas pu être enregistré :\\n" + file.errorString());
+            return false;
+        }
+        QTextStream stream(&file);
+        if (suffix == "html" || suffix == "htm") stream << editor_->toHtml();
+        else stream << editor_->toPlainText();
+        file.close();
+    }
     editor_->document()->setModified(false);
     updateDocumentInfo();
     return true;
