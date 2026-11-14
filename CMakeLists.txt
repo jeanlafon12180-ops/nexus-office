@@ -37,6 +37,8 @@ qt_add_executable(nexus-office
 )
 
 target_link_libraries(nexus-office PRIVATE Qt6::Widgets Qt6::PrintSupport)
+target_compile_definitions(nexus-office PRIVATE NEXUS_SLIDES_ODP_HELPER="${CMAKE_SOURCE_DIR}/tools/slides_odp.py")
+install(FILES tools/slides_odp.py DESTINATION share/nexus-office)
 
 if(NEXUS_ENABLE_LIBREOFFICEKIT)
     find_path(LIBREOFFICEKIT_INCLUDE_DIR
