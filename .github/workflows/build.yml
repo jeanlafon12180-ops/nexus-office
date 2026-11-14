@@ -76,7 +76,10 @@ jobs:
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { throw "Inno Setup compiler not found." }
-          & $iscc "installer/windows/NexusOffice.iss" "/DSourceDir=$((Get-Location).Path)\dist" "/DOutputDir=$((Get-Location).Path)"
+          New-Item -ItemType Directory -Force -Path "installer-output" | Out-Null
+          $sourceDir = (Resolve-Path "dist").Path.Replace('\', '/')
+          $outputDir = (Resolve-Path "installer-output").Path.Replace('\', '/')
+          & $iscc "installer/windows/NexusOffice.iss" "/DSourceDir=$sourceDir" "/DOutputDir=$outputDir"
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
 
       - name: Upload Windows installer
