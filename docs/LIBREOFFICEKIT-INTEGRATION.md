@@ -6,54 +6,83 @@ Use LibreOfficeKit as the document engine behind the Nexus Office interface whil
 
 ## Current status
 
-**Preparation only.** The application does not currently load, render, edit, or save office documents through LibreOfficeKit.
+**Preparation and adapter boundary only.** The application does not yet load, render, edit, or save office documents through LibreOfficeKit.
 
-The CMake option `NEXUS_ENABLE_LIBREOFFICEKIT` is OFF by default. Turning it on only checks for a header and library; it does not activate document editing.
+The document-engine interface and unavailable backend exist. They are not a real document editor.
+
+## Confirmed technical direction
+
+LibreOfficeKit exposes a C/C++ interface. Its tiled-editing model is the relevant path for a custom desktop UI:
+
+- Initialize a LibreOfficeKit instance from a LibreOffice installation directory.
+- Load a document through the Office API.
+- Call `initializeForRendering()` after loading.
+- Render document regions into pixel buffers with `paintTile()`.
+- Forward keyboard and mouse input through `postKeyEvent()` and `postMouseEvent()`.
+- Receive engine events through document callbacks, including tile invalidation and cursor/selection updates.
+- Save through the document's `saveAs()` API.
+
+The tiled-rendering/editing surface is marked unstable in the upstream headers and requires `LOK_USE_UNSTABLE_API` before including LibreOfficeKit headers. This creates an API-version and compatibility obligation: pin and test the LibreOffice version used for each release.
+
+Reference: upstream LibreOfficeKit README and headers. See the upstream documentation before implementing against a particular LibreOffice release.
 
 ## Required stages
 
-### 1. Confirm platform support
+### 1. Pin a supported LibreOffice version
 
 For Windows, Linux, and macOS separately, record:
-- Supported LibreOfficeKit release and development package
-- Header and library locations
+- Exact LibreOffice release/build used
+- Header and runtime locations
 - Runtime libraries and data files required at launch
+- How the application locates the LibreOffice installation
 - Distribution and packaging requirements
 - License notices and source-availability obligations
 
 Do not assume that one platform's package layout applies to the others.
 
-### 2. Verify the API
+### 2. Implement the real backend
 
-Before writing the backend, inspect the exact installed LibreOfficeKit headers and official API documentation. Confirm the supported lifecycle and callback APIs for:
-- Creating and destroying a LibreOfficeKit instance
-- Loading and closing a document
-- Rendering document pages or tiles
-- Sending editing commands
-- Saving and exporting
-- Receiving status, error, and document-change callbacks
+Create a `LibreOfficeKitDocumentEngine` implementation behind the Nexus-owned `DocumentEngine` interface.
 
-### 3. Add a Nexus-owned adapter
+Responsibilities:
+- Initialize and shut down the engine safely
+- Convert local file paths to valid file URLs
+- Load and close a document
+- Initialize tiled rendering
+- Render bounded tiles into a Qt-compatible image buffer
+- Forward keyboard and mouse events from the editor canvas
+- Receive callbacks safely and schedule UI updates on the Qt GUI thread
+- Save to a chosen output path and report errors accurately
 
-Create a small interface in the Nexus source tree. UI code should depend on that interface, not on LibreOfficeKit headers or raw engine handles.
+Do not call unstable methods unless the selected LibreOffice build exposes the expected API.
 
-The adapter should report unsupported operations explicitly and must not silently claim that a document was saved or changed.
+### 3. Build the first Writer editing surface
 
-### 4. Implement and test capabilities incrementally
+Start with Writer only:
+1. Open an ODT test document.
+2. Display its rendered page.
+3. Forward keyboard and mouse events.
+4. Refresh invalidated tiles and selection/cursor overlays.
+5. Save a copy and reopen it to verify the saved result.
 
-Recommended order:
-1. Engine discovery and initialization
-2. Open a test document read-only
-3. Render the first page
-4. Close documents and release resources safely
-5. Save a copy
-6. Enable editing commands
-7. Verify ODT, ODS, ODP, DOCX, XLSX, and PPTX compatibility separately
+Only after this vertical slice works should Sheets and Slides be added.
 
-### 5. Add platform CI and packaging
+### 4. Verify compatibility and safety
 
-Build and test the backend on each target platform with the matching runtime dependencies. A successful Qt-shell build is not evidence that LibreOfficeKit integration works.
+Test:
+- Empty, large, and multi-page documents
+- Unicode text and common fonts
+- Read-only and password-protected documents
+- Invalid paths and unsupported formats
+- Engine shutdown while a document is open
+- Save failures and interrupted operations
+
+### 5. Package the desktop application
+
+The installer must include or reliably locate the matching LibreOffice runtime and all required dependencies. Test on clean machines without a developer environment.
+
+A successful Qt-shell build is not evidence that the LibreOfficeKit backend or its runtime packaging works.
 
 ## Licensing checklist
 
-Review the exact LibreOfficeKit version, linked libraries, bundled runtime files, and all transitive dependencies. Preserve notices and satisfy applicable license terms before distributing builds. See [LICENSING.md](LICENSING.md).
+Review the exact LibreOffice version, linked libraries, bundled runtime files, and all transitive dependencies. Preserve notices and satisfy applicable license terms before distributing builds. See [LICENSING.md](LICENSING.md).
