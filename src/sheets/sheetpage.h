@@ -12,6 +12,11 @@ private:
     void newSheet();
     void openCsv();
     void saveCsv();
+    void openXlsx();
+    void saveXlsx();
+    void sortByCurrentColumn();
+    void filterRows();
+    void clearFilter();
     void addRow();
     void addColumn();
     void recalculate();
