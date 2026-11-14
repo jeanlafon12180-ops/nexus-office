@@ -202,22 +202,29 @@ void SlidesPage::startSlideshow()
         previous->setEnabled(index>0); next->setEnabled(index+1<stack->count());
     };
     auto change=[&](int index){
-        if(index<0 || index>=stack->count())return;
+        if(index<0 || index>=stack->count() || index==stack->currentIndex())return;
         const QString transition=transition_->currentText();
-        if(transition=="Aucune"){stack->setCurrentIndex(index);update();return;}
-        QWidget *current=stack->currentWidget();
-        auto *effect=new QGraphicsOpacityEffect(current);
-        current->setGraphicsEffect(effect);
-        auto *animation=new QPropertyAnimation(effect,"opacity",&dialog);
-        animation->setDuration(220);
-        animation->setStartValue(transition=="Fondu"?1.0:0.55);
-        animation->setEndValue(transition=="Fondu"?0.15:1.0);
-        connect(animation,&QPropertyAnimation::finished,&dialog,[&,index,current,effect]{
-            current->setGraphicsEffect(nullptr);
-            stack->setCurrentIndex(index);
-            update();
-        });
-        animation->start(QAbstractAnimation::DeleteWhenStopped);
+        const int direction=index>stack->currentIndex()?1:-1;
+        stack->setCurrentIndex(index);
+        QWidget *nextPage=stack->currentWidget();
+        if(transition=="Aucune"){update();return;}
+        if(transition=="Fondu"){
+            auto *effect=new QGraphicsOpacityEffect(nextPage);
+            nextPage->setGraphicsEffect(effect);
+            auto *animation=new QPropertyAnimation(effect,"opacity",&dialog);
+            animation->setDuration(260);
+            animation->setStartValue(0.0);
+            animation->setEndValue(1.0);
+            connect(animation,&QPropertyAnimation::finished,&dialog,[nextPage]{nextPage->setGraphicsEffect(nullptr);});
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
+        }else{
+            auto *animation=new QPropertyAnimation(nextPage,"pos",&dialog);
+            animation->setDuration(260);
+            animation->setStartValue(QPoint(direction*stack->width(),0));
+            animation->setEndValue(QPoint(0,0));
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
+        }
+        update();
     };
     connect(previous,&QPushButton::clicked,&dialog,[&]{change(stack->currentIndex()-1);});
     connect(next,&QPushButton::clicked,&dialog,[&]{change(stack->currentIndex()+1);});
