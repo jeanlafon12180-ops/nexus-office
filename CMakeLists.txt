@@ -71,6 +71,10 @@ if(BUILD_TESTING)
     )
     add_test(NAME documentengine-contract COMMAND documentengine-tests)
 
+    add_executable(formulaengine-tests tests/formulaengine_test.cpp)
+    target_link_libraries(formulaengine-tests PRIVATE Qt6::Core)
+    add_test(NAME sheets-formula-engine COMMAND formulaengine-tests)
+
     find_program(LIBREOFFICE_EXECUTABLE NAMES soffice)
     if(LIBREOFFICE_EXECUTABLE)
         add_test(NAME writer-docx-roundtrip
