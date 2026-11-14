@@ -15,7 +15,7 @@ option(NEXUS_ENABLE_LIBREOFFICEKIT
     OFF
 )
 
-find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets PrintSupport)
 
 qt_standard_project_setup()
 
@@ -30,7 +30,7 @@ qt_add_executable(nexus-office
     src/document/unavailabledocumentengine.cpp
 )
 
-target_link_libraries(nexus-office PRIVATE Qt6::Widgets)
+target_link_libraries(nexus-office PRIVATE Qt6::Widgets Qt6::PrintSupport)
 
 if(NEXUS_ENABLE_LIBREOFFICEKIT)
     find_path(LIBREOFFICEKIT_INCLUDE_DIR
