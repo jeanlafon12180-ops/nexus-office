@@ -15,6 +15,7 @@
 #include <QKeySequence>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <QPageSetupDialog>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFont>
@@ -95,6 +96,7 @@ WriterPage::WriterPage(QWidget *parent)
     auto *openButton = new QPushButton("Ouvrir", this);
     auto *saveButton = new QPushButton("Enregistrer", this);
     auto *pdfButton = new QPushButton("Exporter PDF", this);
+    auto *printButton = new QPushButton("Imprimer", this);
     newButton->setObjectName("writerSecondary");
     openButton->setObjectName("writerSecondary");
     saveButton->setObjectName("writerPrimary");
@@ -102,6 +104,7 @@ WriterPage::WriterPage(QWidget *parent)
     header->addWidget(openButton);
     header->addWidget(saveButton);
     header->addWidget(pdfButton);
+    header->addWidget(printButton);
     layout->addLayout(header);
 
     auto *notice = new QLabel(
@@ -182,6 +185,7 @@ WriterPage::WriterPage(QWidget *parent)
     connect(openButton, &QPushButton::clicked, this, &WriterPage::openDocument);
     connect(saveButton, &QPushButton::clicked, this, &WriterPage::saveDocument);
     connect(pdfButton, &QPushButton::clicked, this, &WriterPage::exportPdf);
+    connect(printButton, &QPushButton::clicked, this, &WriterPage::printDocument);
     connect(undoAction, &QAction::triggered, editor_, &QTextEdit::undo);
     connect(redoAction, &QAction::triggered, editor_, &QTextEdit::redo);
     auto *findAction = toolbar->addAction("Rechercher");
@@ -430,6 +434,18 @@ void WriterPage::exportPdf()
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(path);
     editor_->document()->print(&printer);
+}
+
+void WriterPage::printDocument()
+{
+    QPrinter printer(QPrinter::HighResolution);
+    QPageSetupDialog pageSetup(&printer, this);
+    pageSetup.setWindowTitle("Mise en page et impression");
+    if (pageSetup.exec() != QDialog::Accepted) return;
+    QPrintDialog printDialog(&printer, this);
+    printDialog.setWindowTitle("Imprimer le document");
+    if (printDialog.exec() == QDialog::Accepted)
+        editor_->document()->print(&printer);
 }
 
 void WriterPage::applyParagraphStyle(int index)
