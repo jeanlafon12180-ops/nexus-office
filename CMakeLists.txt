@@ -83,6 +83,7 @@ if(BUILD_TESTING)
         src/slides/slidespage.h
     )
     target_link_libraries(slides-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport)
+    target_compile_definitions(slides-ui-tests PRIVATE NEXUS_SLIDES_ODP_HELPER="${CMAKE_SOURCE_DIR}/tools/slides_odp.py")
     add_test(NAME slides-ui-structure COMMAND slides-ui-tests)
     set_tests_properties(slides-ui-structure PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
