@@ -6,6 +6,12 @@
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QTextCursor>
+#include <QTextBlockFormat>
+#include <QTextCharFormat>
+#include <QTextListFormat>
+#include <QImageReader>
+#include <QUrl>
+#include <QComboBox>
 #include <QKeySequence>
 #include <QPrinter>
 #include <QPrintDialog>
@@ -52,8 +58,15 @@ bool convertWithLibreOffice(const QStringList &args, QString *error)
         *error = "LibreOffice est introuvable. Installez-le pour utiliser les fichiers DOCX.";
         return false;
     }
+    QTemporaryDir profile;
+    if (!profile.isValid()) {
+        *error = "Impossible de préparer le profil temporaire de LibreOffice.";
+        return false;
+    }
+    QStringList isolatedArgs = args;
+    isolatedArgs.prepend("-env:UserInstallation=" + QUrl::fromLocalFile(profile.path()).toString());
     QProcess p;
-    p.start(exe, args);
+    p.start(exe, isolatedArgs);
     if (!p.waitForStarted(10000) || !p.waitForFinished(120000) ||
         p.exitStatus() != QProcess::NormalExit || p.exitCode() != 0) {
         if (p.state() != QProcess::NotRunning) { p.kill(); p.waitForFinished(); }
@@ -120,6 +133,11 @@ WriterPage::WriterPage(QWidget *parent)
     undoAction->setShortcut(QKeySequence::Undo);
     redoAction->setShortcut(QKeySequence::Redo);
     toolbar->addSeparator();
+    auto *paragraphStyle = new QComboBox(toolbar);
+    paragraphStyle->addItems({"Corps de texte", "Titre 1", "Titre 2", "Titre 3"});
+    paragraphStyle->setToolTip("Style du paragraphe");
+    toolbar->addWidget(paragraphStyle);
+    toolbar->addSeparator();
     auto *boldAction = toolbar->addAction("Gras");
     boldAction->setCheckable(true);
     boldAction->setToolTip("Mettre en gras");
@@ -138,6 +156,10 @@ WriterPage::WriterPage(QWidget *parent)
     auto *centerAction = toolbar->addAction("Centrer");
     auto *rightAction = toolbar->addAction("Droite");
     auto *justifyAction = toolbar->addAction("Justifier");
+    auto *bulletAction = toolbar->addAction("Liste •");
+    auto *numberAction = toolbar->addAction("Liste 1.");
+    auto *tableAction = toolbar->addAction("Insérer tableau");
+    auto *imageAction = toolbar->addAction("Insérer image");
 
     layout->addWidget(toolbar);
 
@@ -165,6 +187,11 @@ WriterPage::WriterPage(QWidget *parent)
     auto *findAction = toolbar->addAction("Rechercher");
     findAction->setShortcut(QKeySequence::Find);
     connect(findAction, &QAction::triggered, this, &WriterPage::findText);
+    connect(paragraphStyle, qOverload<int>(&QComboBox::currentIndexChanged), this, &WriterPage::applyParagraphStyle);
+    connect(bulletAction, &QAction::triggered, this, [this]() { insertList(false); });
+    connect(numberAction, &QAction::triggered, this, [this]() { insertList(true); });
+    connect(tableAction, &QAction::triggered, this, &WriterPage::insertTable);
+    connect(imageAction, &QAction::triggered, this, &WriterPage::insertImage);
 
     connect(fontFamily, &QFontComboBox::currentFontChanged,
             editor_, &QTextEdit::setCurrentFont);
@@ -403,6 +430,86 @@ void WriterPage::exportPdf()
     printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(path);
     editor_->document()->print(&printer);
+}
+
+void WriterPage::applyParagraphStyle(int index)
+{
+    QTextCursor cursor = editor_->textCursor();
+    QTextBlockFormat block = cursor.blockFormat();
+    QTextCharFormat character;
+    switch (index) {
+    case 1:
+        block.setHeadingLevel(1);
+        character.setFontPointSize(22);
+        character.setFontWeight(QFont::Bold);
+        break;
+    case 2:
+        block.setHeadingLevel(2);
+        character.setFontPointSize(18);
+        character.setFontWeight(QFont::Bold);
+        break;
+    case 3:
+        block.setHeadingLevel(3);
+        character.setFontPointSize(14);
+        character.setFontWeight(QFont::DemiBold);
+        break;
+    default:
+        block.setHeadingLevel(0);
+        character.setFontPointSize(12);
+        character.setFontWeight(QFont::Normal);
+        break;
+    }
+    cursor.setBlockFormat(block);
+    cursor.mergeCharFormat(character);
+    editor_->setTextCursor(cursor);
+    editor_->setFocus();
+}
+
+void WriterPage::insertList(bool numbered)
+{
+    QTextCursor cursor = editor_->textCursor();
+    QTextListFormat format;
+    format.setStyle(numbered ? QTextListFormat::ListDecimal : QTextListFormat::ListDisc);
+    cursor.createList(format);
+    editor_->setTextCursor(cursor);
+    editor_->setFocus();
+}
+
+void WriterPage::insertTable()
+{
+    bool rowsOk = false;
+    const int rows = QInputDialog::getInt(this, "Insérer un tableau", "Nombre de lignes :", 3, 1, 50, 1, &rowsOk);
+    if (!rowsOk) return;
+    bool columnsOk = false;
+    const int columns = QInputDialog::getInt(this, "Insérer un tableau", "Nombre de colonnes :", 3, 1, 20, 1, &columnsOk);
+    if (!columnsOk) return;
+    QTextCursor cursor = editor_->textCursor();
+    cursor.insertTable(rows, columns);
+    editor_->setTextCursor(cursor);
+    editor_->setFocus();
+}
+
+void WriterPage::insertImage()
+{
+    const QString path = QFileDialog::getOpenFileName(this, "Insérer une image", QString(),
+        "Images (*.png *.jpg *.jpeg *.bmp *.gif *.webp)");
+    if (path.isEmpty()) return;
+    QImageReader reader(path);
+    const QImage image = reader.read();
+    if (image.isNull()) {
+        QMessageBox::warning(this, "Image impossible à ouvrir", reader.errorString());
+        return;
+    }
+    QTextImageFormat format;
+    format.setName(path);
+    const QSize maxSize(640, 480);
+    const QSize scaled = image.size().scaled(maxSize, Qt::KeepAspectRatio);
+    format.setWidth(scaled.width());
+    format.setHeight(scaled.height());
+    QTextCursor cursor = editor_->textCursor();
+    cursor.insertImage(format);
+    editor_->setTextCursor(cursor);
+    editor_->setFocus();
 }
 
 void WriterPage::updateDocumentInfo()
