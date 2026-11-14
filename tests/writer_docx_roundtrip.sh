@@ -23,20 +23,40 @@ cat > "$WORK_DIR/source.html" <<'HTML'
 </html>
 HTML
 
-# Export a representative rich-text document to DOCX using the same
-# explicit LibreOffice filter as Nexus Writer.
 "$SOFFICE" "-env:UserInstallation=file://$WORK_DIR/profile" --headless \
   --convert-to 'docx:Office Open XML Text' --outdir "$WORK_DIR/docx" "$WORK_DIR/source.html" >/dev/null
 DOCX="$WORK_DIR/docx/source.docx"
 test -s "$DOCX"
 
-# Reopen the generated DOCX as HTML and verify that text and key content
-# survive the import/export cycle.
 "$SOFFICE" "-env:UserInstallation=file://$WORK_DIR/profile" --headless \
   --convert-to html --outdir "$WORK_DIR/roundtrip" "$DOCX" >/dev/null
 ROUNDTRIP="$WORK_DIR/roundtrip/source.html"
 test -s "$ROUNDTRIP"
-grep -q "NEXUS_WRITER_ROUNDTRIP_OK" "$ROUNDTRIP"
-grep -q "Cellule test" "$ROUNDTRIP"
-grep -q "Premier élément" "$ROUNDTRIP"
-grep -q "Texte français" "$ROUNDTRIP"
+
+# HTML output may encode accents and punctuation as entities. Parse it as
+# HTML before checking the actual recovered text, rather than grepping markup.
+python3 - "$ROUNDTRIP" <<'PY'
+import sys
+from html.parser import HTMLParser
+from pathlib import Path
+
+class TextExtractor(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts = []
+    def handle_data(self, data):
+        self.parts.append(data)
+
+parser = TextExtractor()
+parser.feed(Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace"))
+text = " ".join(" ".join(parser.parts).split())
+required = [
+    "NEXUS_WRITER_ROUNDTRIP_OK",
+    "Cellule test",
+    "Premier élément",
+    "Texte français",
+]
+missing = [value for value in required if value not in text]
+if missing:
+    raise SystemExit("DOCX round-trip lost expected content: " + ", ".join(missing))
+PY
