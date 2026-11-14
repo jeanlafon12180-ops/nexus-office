@@ -53,6 +53,7 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     add("Trier la colonne", [this]{sortByCurrentColumn();});
     add("Filtrer", [this]{filterRows();});
     add("Effacer filtre", [this]{clearFilter();});
+    add("Graphique", [this]{showChart();});
     root->addLayout(top);
     auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules : +, -, *, /, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX, COUNT sur une plage.",this);
     hint->setWordWrap(true); hint->setStyleSheet("color:#52627a;background:transparent");
@@ -248,6 +249,49 @@ void SheetPage::clearFilter()
     for (int row=0;row<table_->rowCount();++row) table_->setRowHidden(row,false);
     status_->setText("Filtre effacé.");
 }
+void SheetPage::showChart()
+{
+    const int column=table_->currentColumn();
+    if(column<0){QMessageBox::information(this,"Graphique","Sélectionnez une colonne numérique.");return;}
+    QVector<QPair<QString,double>> values;
+    for(int row=0;row<table_->rowCount();++row){
+        if(table_->isRowHidden(row))continue;
+        const auto *item=table_->item(row,column);
+        if(!item)continue;
+        bool ok=false;
+        const double number=item->data(Qt::DisplayRole).toString().toDouble(&ok);
+        if(ok)values.push_back({QString::number(row+1),number});
+        if(values.size()>=30)break;
+    }
+    if(values.isEmpty()){QMessageBox::information(this,"Graphique","Aucune valeur numérique dans cette colonne.");return;}
+    class BarChart final:public QWidget{
+    public:
+        explicit BarChart(QVector<QPair<QString,double>> data,QWidget *parent=nullptr):QWidget(parent),data_(std::move(data)){setMinimumSize(520,320);}
+    protected:
+        void paintEvent(QPaintEvent *) override{
+            QPainter p(this);p.setRenderHint(QPainter::Antialiasing);p.fillRect(rect(),palette().base());
+            const QRect area=rect().adjusted(48,20,-20,-42);double maxValue=0;
+            for(const auto &item:data_)maxValue=qMax(maxValue,qAbs(item.second));if(maxValue==0)maxValue=1;
+            p.setPen(palette().text().color());p.drawLine(area.bottomLeft(),area.bottomRight());
+            const int slotWidth=qMax(1,area.width()/data_.size()),barWidth=qMax(2,slotWidth*2/3);
+            for(int i=0;i<data_.size();++i){
+                const int height=qRound(qAbs(data_[i].second/maxValue)*(area.height()-24));
+                const int x=area.left()+i*slotWidth+(slotWidth-barWidth)/2;
+                const int y=data_[i].second>=0?area.bottom()-height:area.bottom();
+                p.fillRect(QRect(x,y,barWidth,height),QColor(49,91,232));
+                p.drawText(QRect(x-8,area.bottom()+5,barWidth+16,24),Qt::AlignHCenter|Qt::AlignTop,data_[i].first);
+                p.drawText(QRect(x-18,y-20,barWidth+36,18),Qt::AlignHCenter|Qt::AlignVCenter,QString::number(data_[i].second,'g',5));
+            }
+        }
+    private:QVector<QPair<QString,double>> data_;
+    };
+    QDialog dialog(this);dialog.setWindowTitle("Graphique — colonne "+QString::number(column+1));
+    auto *layout=new QVBoxLayout(&dialog);layout->addWidget(new BarChart(values,&dialog));
+    auto *buttons=new QDialogButtonBox(QDialogButtonBox::Close,&dialog);
+    connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
+    dialog.resize(640,400);dialog.exec();
+}
+
 void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
     QFile f(path);if(!f.open(QIODevice::WriteOnly|QIODevice::Text)){QMessageBox::warning(this,"Enregistrement impossible",f.errorString());return;}
