@@ -60,10 +60,17 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Étape 3 — terminer Nexus Slides
 
-- [ ] Gérer plusieurs diapositives
-- [ ] Ajouter thèmes, images, formes, tableaux et notes
+- [x] Gérer plusieurs diapositives : création, navigation et suppression
+- [x] Ajouter trois thèmes visuels : clair, bleu et sombre
+- [x] Insérer des images dans le contenu d'une diapositive
+- [x] Ajouter des notes de présentateur (non imprimées)
+- [x] Exporter une présentation multipage en PDF paysage
+- [ ] Ajouter des formes et des tableaux dédiés
 - [ ] Ajouter transitions et animations
-- [ ] Ajouter import/export PPTX
+- [ ] Ajouter import/export PPTX avec vérification de compatibilité
+- [ ] Ajouter des tests automatisés sur la structure et l'export des présentations
+
+**Étape 3 en cours — socle multipage réalisé.** La création et la suppression de diapositives, les thèmes, l'insertion d'images, les notes et l'export PDF multipage sont intégrés. La compilation et les tests CI passent sur le commit courant. L'étape ne sera déclarée terminée qu'après les formes/tableaux, les transitions, l'interopérabilité PPTX et des tests dédiés.
 
 ## Étape 4 — terminer Nexus PDF
 
@@ -91,4 +98,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides ne gère qu'une diapositive et n'exporte pas PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides gère plusieurs diapositives et exporte en PDF, mais ne prend pas encore en charge les formes/tableaux dédiés, les transitions/animations ni l'import/export PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
