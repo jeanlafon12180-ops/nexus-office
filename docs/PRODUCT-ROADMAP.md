@@ -10,28 +10,40 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 - [x] Writer : ouverture et enregistrement Markdown
 - [x] Writer : recherche dans le document
 - [x] Writer : annuler / rétablir
-- [x] Writer : export PDF
-- [x] Writer : import/export DOCX par conversion LibreOffice (dépendance externe, fidélité à valider)
+- [x] Writer : export PDF avec dialogue de mise en page
+- [x] Writer : impression avec dialogue de mise en page
+- [x] Writer : import/export DOCX par conversion LibreOffice
+- [x] Writer : insertion de tableaux et d'images, listes et styles de titres
+- [x] Writer : vérification orthographique française via Hunspell (dépendance système)
 - [x] Sheets : grille éditable et import/export CSV
-- [x] Sheets : formules simples
+- [x] Sheets : formules simples et affichage de leurs résultats
 - [x] Slides : édition d'une diapositive simple et export PDF
 - [x] PDF : ouverture avec le lecteur PDF du système
 
-## Étape 1 — terminer Nexus Writer
+## Étape 1 — Nexus Writer MVP
 
-- [ ] Tester ouverture, modification et réenregistrement de DOCX variés
-- [ ] Améliorer la fidélité DOCX et préserver les éléments de mise en page
-- [x] Ajouter tableaux, insertion d’images, listes à puces/numérotées et styles de titres
-- [ ] Ajouter en-têtes, pieds de page, numéros de page et réglages de page
-- [ ] Ajouter correcteur orthographique et dictionnaire
-- [x] Ajouter les boîtes de dialogue de mise en page et d’impression
-- [x] Ajouter l’export PDF
-- [ ] Valider le test automatisé de conversion DOCX aller-retour dans la CI
-- [ ] Ajouter des tests automatisés fonctionnels d’ouverture et d’enregistrement dans Writer
+- [x] Édition de texte enrichi et mise en forme courante
+- [x] Ouverture et enregistrement TXT, HTML et Markdown
+- [x] Import et export DOCX via LibreOffice
+- [x] Insertion de tableaux, images, listes et styles de titres
+- [x] Recherche, annulation et rétablissement
+- [x] Correcteur orthographique français via Hunspell
+- [x] Réglages de page, impression et export PDF
+- [x] Test automatisé DOCX aller-retour dans la CI
+- [x] Compilation et tests automatisés validés dans la CI
+
+**Étape 1 terminée au niveau MVP.** Cela signifie que le socle fonctionnel de Writer est présent et que la compilation ainsi que le test DOCX aller-retour passent dans la CI. Cela ne constitue pas une certification de compatibilité complète avec Microsoft Word.
+
+## Améliorations Writer à reprendre dans l'étape qualité
+
+- [ ] Tester un corpus varié de documents DOCX provenant de différentes versions de Word et LibreOffice
+- [ ] Améliorer la fidélité DOCX et préserver davantage d'éléments de mise en page
+- [ ] Ajouter des en-têtes, pieds de page et numéros de page répétitifs
+- [ ] Ajouter des tests fonctionnels automatisés couvrant l'ouverture, la modification et l'enregistrement depuis l'interface
+- [ ] Améliorer le correcteur avec suggestions et choix de dictionnaire
 
 ## Étape 2 — terminer Nexus Sheets
 
-- [ ] Afficher les résultats des formules directement dans les cellules
 - [ ] Construire un moteur de calcul plus complet
 - [ ] Ajouter import/export XLSX
 - [ ] Ajouter plusieurs feuilles, graphiques, tris et filtres
@@ -69,4 +81,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer ne garantit pas encore une fidélité complète aux documents DOCX. Sheets ne prend pas encore en charge XLSX. Slides ne gère qu'une diapositive et n'exporte pas PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées indiquent uniquement ce qui existe dans le prototype, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets ne prend pas encore en charge XLSX. Slides ne gère qu'une diapositive et n'exporte pas PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
