@@ -10,6 +10,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(NEXUS_ENABLE_LIBREOFFICEKIT
+    "Enable the optional LibreOfficeKit dependency (integration is not implemented yet)"
+    OFF
+)
+
 find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets)
 
 qt_standard_project_setup()
@@ -21,6 +26,29 @@ qt_add_executable(nexus-office
 )
 
 target_link_libraries(nexus-office PRIVATE Qt6::Widgets)
+
+if(NEXUS_ENABLE_LIBREOFFICEKIT)
+    find_path(LIBREOFFICEKIT_INCLUDE_DIR
+        NAMES LibreOfficeKit/LibreOfficeKit.h
+        DOC "Directory containing the LibreOfficeKit headers"
+    )
+    find_library(LIBREOFFICEKIT_LIBRARY
+        NAMES libreofficekit
+        DOC "LibreOfficeKit library"
+    )
+
+    if(NOT LIBREOFFICEKIT_INCLUDE_DIR OR NOT LIBREOFFICEKIT_LIBRARY)
+        message(FATAL_ERROR
+            "NEXUS_ENABLE_LIBREOFFICEKIT is ON, but LibreOfficeKit headers "
+            "or library were not found. Install the matching development package "
+            "for your platform, or configure with -DNEXUS_ENABLE_LIBREOFFICEKIT=OFF."
+        )
+    endif()
+
+    target_include_directories(nexus-office PRIVATE ${LIBREOFFICEKIT_INCLUDE_DIR})
+    target_link_libraries(nexus-office PRIVATE ${LIBREOFFICEKIT_LIBRARY})
+    target_compile_definitions(nexus-office PRIVATE NEXUS_HAS_LIBREOFFICEKIT=1)
+endif()
 
 set_target_properties(nexus-office PROPERTIES
     WIN32_EXECUTABLE TRUE
