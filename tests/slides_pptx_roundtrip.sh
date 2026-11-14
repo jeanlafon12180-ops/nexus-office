@@ -8,9 +8,9 @@ cat > "$WORK/fixture.fodp" <<'FODP'
 <office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
  xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
  xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
- office:version="1.2">
+ office:version="1.2" office:mimetype="application/vnd.oasis.opendocument.presentation" office:class="presentation">\n <office:automatic-styles/><office:master-styles>
  <office:body><office:presentation>
-  <draw:page draw:name="Slide1">
+  <draw:page draw:name="Slide1" draw:master-page-name="Default">
    <draw:frame><draw:text-box>
     <text:p>Nexus Slides PPTX Test</text:p>
     <text:p>Editable presentation content</text:p>
