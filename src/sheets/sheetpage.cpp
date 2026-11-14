@@ -53,7 +53,7 @@ QString SheetPage::cellValue(int row,int col,int depth) const {
     auto *item=table_->item(row,col); if(!item) return "0";
     QString raw=item->text().trimmed(); if(!raw.startsWith('=')) return raw;
     raw=raw.mid(1).trimmed();
-    auto colIndex=[](const QString &letters){int n=0;for(QChar ch:letters.toUpper()){if(!ch.isLetter())return -1;n=n*26+ch.unicode()-'A'.unicode()+1;}return n-1;};
+    auto colIndex=[](const QString &letters){int n=0;for(QChar ch:letters.toUpper()){if(!ch.isLetter())return -1;n=n*26+ch.unicode()-QChar('A').unicode()+1;}return n-1;};
     QRegularExpression sum("^SUM\\(([A-Z]+)([0-9]+):([A-Z]+)([0-9]+)\\)$",QRegularExpression::CaseInsensitiveOption);
     auto sm=sum.match(raw);
     if(sm.hasMatch()){
