@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     sideLayout->addWidget(brand);
     sideLayout->addWidget(makeLabel("Votre espace de travail. Une suite.", "sidebarMuted", sidebar));
     sideLayout->addSpacing(28);
-    sideLayout->addWidget(makeLabel("WORKSPACE", "sidebarSection", sidebar));
+    sideLayout->addWidget(makeLabel("ESPACE DE TRAVAIL", "sidebarSection", sidebar));
 
     pages = new QStackedWidget(central);
 
@@ -123,8 +123,8 @@ MainWindow::MainWindow(QWidget *parent)
 
         layout->addStretch();
         auto *notice = makeLabel(
-            "Early preview: the desktop interface is in place. Document editing "
-            "and format conversion will arrive after the LibreOffice engine is integrated.",
+            "Aperçu : Writer permet de créer et modifier des documents. "
+            "La compatibilité DOCX nécessite LibreOffice installé sur votre ordinateur.",
             "notice", page);
         notice->setWordWrap(true);
         layout->addWidget(notice);
@@ -147,8 +147,8 @@ MainWindow::MainWindow(QWidget *parent)
         statusLayout->setContentsMargins(22, 22, 22, 22);
         statusLayout->addWidget(makeLabel("Cet espace est en cours de développement", "cardTitle", status));
         auto *detail = makeLabel(
-            "The interface is ready for the next development milestone. "
-            "The document engine is not connected yet, so files cannot be edited in this preview.",
+            "Cette interface est en préparation. Les fonctions de tableur, de présentation "
+            "et de gestion PDF seront ajoutées progressivement.",
             "muted", status);
         detail->setWordWrap(true);
         statusLayout->addWidget(detail);
@@ -158,13 +158,16 @@ MainWindow::MainWindow(QWidget *parent)
         layout->addWidget(chooseFile, 0, Qt::AlignLeft);
         connect(chooseFile, &QPushButton::clicked, this, [this, name]() {
             const QString file = QFileDialog::getOpenFileName(
-                this, "Select a file for " + name, QString(),
+                this, "Choisir un fichier pour " + name, QString(),
                 "Office documents (*.odt *.ods *.odp *.docx *.xlsx *.pptx *.pdf);;All files (*)");
             if (!file.isEmpty()) {
                 QMessageBox::information(
                     this, "Fichier sélectionné",
-                    "Selected file:\n" + file +
-                    "\n\nThe document engine is not integrated yet. "
+                    "Selected file:
+" + file +
+                    "
+
+The document engine is not integrated yet. "
                     "This file has not been opened or modified.");
             }
         });
@@ -203,7 +206,8 @@ void MainWindow::applyTheme(bool dark)
 
     if (dark) {
         setStyleSheet(R"(
-            QMainWindow, QWidget { background: #111827; color: #e5e7eb; }\n            QLabel { background: transparent; border: 0; }
+            QMainWindow, QWidget { background: #111827; color: #e5e7eb; }
+            QLabel { background: transparent; border: 0; }
             QWidget#sidebar { background: #0b1220; }
             QLabel#brand { color: #ffffff; font-size: 19px; font-weight: 800; letter-spacing: 1px; }
             QLabel#sidebarMuted { color: #8793a8; font-size: 11px; }
@@ -236,7 +240,8 @@ void MainWindow::applyTheme(bool dark)
         )");
     } else {
         setStyleSheet(R"(
-            QMainWindow, QWidget { background: #f5f7fb; color: #172033; }\n            QLabel { background: transparent; border: 0; }
+            QMainWindow, QWidget { background: #f5f7fb; color: #172033; }
+            QLabel { background: transparent; border: 0; }
             QWidget#sidebar { background: #111827; color: #f9fafb; }
             QLabel#brand { color: #ffffff; font-size: 19px; font-weight: 800; letter-spacing: 1px; }
             QLabel#sidebarMuted { color: #8b95a7; font-size: 11px; }
