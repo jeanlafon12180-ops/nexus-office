@@ -57,12 +57,18 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     auto *hint = new QLabel("Tableur CSV : modifiez les cellules. Formules : +, -, *, /, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX, COUNT sur une plage.",this);
     hint->setWordWrap(true); hint->setStyleSheet("color:#52627a;background:transparent");
     root->addWidget(hint);
-    table_ = new QTableWidget(30,12,this);
+    tabs_ = new QTabWidget(this);
+    table_ = new QTableWidget(30,12,tabs_);
     table_->setObjectName("sheetsTable");
     table_->setAlternatingRowColors(true);
     table_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table_->verticalHeader()->setDefaultSectionSize(28);
-    root->addWidget(table_,1);
+    tabs_->addTab(table_, "Feuille 1");
+    root->addWidget(tabs_,1);
+    connect(tabs_, &QTabWidget::currentChanged, this, [this](int index) {
+        table_ = qobject_cast<QTableWidget *>(tabs_->widget(index));
+        if (table_) recalculate();
+    });
     status_ = new QLabel("Prêt · 30 lignes · 12 colonnes",this);
     root->addWidget(status_);
     connect(table_,&QTableWidget::cellChanged,this,[this]{recalculate();});
