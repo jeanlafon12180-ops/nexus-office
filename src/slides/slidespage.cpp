@@ -248,7 +248,7 @@ void SlidesPage::importPptx()
         } else if(inPage&&xml.isStartElement()&&xml.name().toString()=="p"){
             const QString text=xml.readElementText();
             if(!titleSeen){title=text;titleSeen=true;}else{if(!body.isEmpty())body+="\n";body+=text;}
-        } else if(xml.isEndElement()&&xml.name()=="page"&&inPage){
+        } else if(xml.isEndElement()&&xml.name().toString()=="page"&&inPage){
             imported.push_back({title,body});inPage=false;
         }
     }
@@ -272,14 +272,14 @@ void SlidesPage::exportPptx()
     const QString soffice=QStandardPaths::findExecutable("soffice");
     if(soffice.isEmpty()){QMessageBox::warning(this,"Export PPTX","LibreOffice Impress est nécessaire pour exporter un PPTX.");return;}
     QTemporaryDir temp;if(!temp.isValid())return;
-    QString fodp="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>"
-      "<office:document xmlns:office=\\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\\" "
-      "xmlns:draw=\\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\\" "
-      "xmlns:text=\\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\\" "
-      "office:version=\\"1.2\\"><office:body><office:presentation>";
+    QString fodp="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<office:document xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" "
+      "xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" "
+      "xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" "
+      "office:version=\"1.2\"><office:body><office:presentation>";
     for(int i=0;i<slides_.size();++i){
         const auto &slide=slides_[i];
-        fodp+="<draw:page draw:name=\\"Slide"+QString::number(i+1)+"\\">";
+        fodp+="<draw:page draw:name=\"Slide"+QString::number(i+1)+"\">";
         fodp+="<draw:frame><draw:text-box><text:p>"+slide.title->text().toHtmlEscaped()+"</text:p>";
         const QStringList lines=slide.body->toPlainText().split('\n');
         for(const QString &line:lines)fodp+="<text:p>"+line.toHtmlEscaped()+"</text:p>";
