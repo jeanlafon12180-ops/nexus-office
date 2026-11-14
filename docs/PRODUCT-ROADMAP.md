@@ -67,11 +67,12 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 - [x] Exporter une présentation multipage en PDF paysage
 - [x] Ajouter l'insertion de tableaux éditables dans une diapositive
 - [x] Ajouter des blocs de forme simples : encadré, bandeau et citation
-- [ ] Ajouter transitions et animations de présentation
-- [ ] Ajouter import/export PPTX avec vérification de compatibilité
-- [ ] Ajouter des tests automatisés sur la structure et l'export des présentations
+- [x] Ajouter un mode diaporama avec transitions Fondu et Glissement
+- [x] Ajouter l'import et l'export PPTX via LibreOffice Impress et un échange ODP
+- [x] Ajouter un test UI de structure de l'éditeur Slides
+- [x] Ajouter un test automatisé aller-retour PPTX vérifiant plusieurs diapositives et le texte
 
-**Étape 3 en cours — éditeur enrichi réalisé.** La création et la suppression de diapositives, les thèmes, l'insertion d'images, les notes, les tableaux éditables, les blocs de forme simples et l'export PDF multipage sont intégrés. La compilation et les tests CI passent sur le commit courant. L'étape ne sera déclarée terminée qu'après les transitions/animations, l'interopérabilité PPTX et des tests dédiés.
+**Étape 3 terminée au niveau MVP.** Le mode diaporama propose les transitions Fondu et Glissement. L'import/export PPTX fonctionne par conversion LibreOffice via un fichier ODP intermédiaire. Les tests UI et le test d'aller-retour PPTX passent dans la CI. L'interopérabilité reste volontairement limitée : l'échange PPTX conserve le texte et les diapositives, mais ne préserve pas encore fidèlement les images, tableaux, formes, notes, thèmes et animations.
 
 ## Étape 4 — terminer Nexus PDF
 
@@ -99,4 +100,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides gère plusieurs diapositives et exporte en PDF, mais propose des tableaux et des blocs de forme simples, mais ne prend pas encore en charge les transitions/animations ni l'import/export PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides propose un diaporama avec transitions et un import/export PPTX de base via LibreOffice. Le passage PPTX ne conserve actuellement que les titres et le texte des diapositives ; les éléments riches (images, tableaux, formes, notes, thèmes et animations) ne sont pas encore préservés. Le module nécessite LibreOffice Impress et Python 3 pour l'échange PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
