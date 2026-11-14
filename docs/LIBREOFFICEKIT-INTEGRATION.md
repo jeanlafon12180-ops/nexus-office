@@ -6,9 +6,9 @@ Use LibreOfficeKit as the document engine behind the Nexus Office interface whil
 
 ## Current status
 
-**Preparation and adapter boundary only.** The application does not yet load, render, edit, or save office documents through LibreOfficeKit.
+**Prototype stage.** Nexus Writer now has a basic Qt rich-text editor that can open and save HTML and plain-text files. It supports basic character formatting, paragraph alignment, new/open/save workflows, and a live word count.
 
-The document-engine interface and unavailable backend exist. They are not a real document editor.
+This prototype is not connected to LibreOfficeKit and does not support DOCX, ODT, XLSX, or other office formats. The document-engine interface and unavailable backend still refuse office-document operations. Word compatibility requires the real backend described below.
 
 ## Confirmed technical direction
 
