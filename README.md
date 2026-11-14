@@ -4,7 +4,7 @@
 
 Nexus Office aims to provide a clean, familiar productivity experience inspired by Microsoft Office, with its own visual identity and an office engine based on LibreOffice technology.
 
-> **Project status: Early prototype (0.1.0).** The current code provides a Qt desktop shell with navigation, module landing pages, file selection dialogs, and light/dark themes. It does not yet edit or convert documents.
+> **Project status: Early prototype (0.2.0).** The Qt desktop shell is in place. This release adds the first Nexus-owned document-engine interface and a safe placeholder backend. Real document loading, editing, and conversion are not implemented yet.
 
 ## Planned applications
 
@@ -26,7 +26,7 @@ Nexus Office aims to provide a clean, familiar productivity experience inspired 
 - **C++17**
 - **Qt 6 Widgets**
 - **CMake 3.21+**
-- **LibreOfficeKit:** planned document-engine integration; preparation only
+- **LibreOfficeKit:** planned document-engine backend; not connected yet
 
 ## Build the desktop preview
 
@@ -37,25 +37,26 @@ From the repository root:
 ```bash
 cmake -S . -B build
 cmake --build build
+ctest --test-dir build --output-on-failure
 ```
 
 Run the generated `nexus-office` executable from the build directory. The exact path depends on your operating system and build generator.
 
-LibreOfficeKit is an optional future dependency. The current application does not call its API. See [the integration plan](docs/LIBREOFFICEKIT-INTEGRATION.md).
+LibreOfficeKit is not required for this preview. The current application does not call its API. See [the integration plan](docs/LIBREOFFICEKIT-INTEGRATION.md).
 
-## Current features
+## Current foundations
 
-- Native Qt desktop window
-- Sidebar navigation between Home, Writer, Sheets, Slides, and PDF
-- Module landing pages
-- Light and dark themes
-- File picker for selecting a document (selection only; no document is opened or changed)
+- Native Qt desktop window with navigation and light/dark themes
+- Nexus-owned `DocumentEngine` interface, separated from the UI
+- Explicit unavailable backend that refuses document operations instead of pretending they succeeded
+- Automated contract test for the unavailable backend
+- File picker in the UI is selection-only; no document is opened or changed
 
 ## Next milestones
 
 1. Validate and improve the desktop shell on Windows, Linux, and macOS.
 2. Verify LibreOfficeKit headers, runtime dependencies, API, and licensing on each platform.
-3. Implement a Nexus-owned document-engine adapter and test document loading and rendering.
+3. Implement and test the LibreOfficeKit backend for document loading and rendering.
 4. Add Writer, Sheets, and Slides workflows.
 5. Add PDF viewing and export workflows.
 6. Package and test platform-specific installers.
