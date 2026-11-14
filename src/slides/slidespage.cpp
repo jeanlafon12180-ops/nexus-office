@@ -63,15 +63,15 @@ SlidesPage::SlidesPage(QWidget *parent) : QWidget(parent)
     root->addLayout(bar);
     auto *options=new QHBoxLayout;
     options->addWidget(new QLabel("Thème :",this));
-    theme_=new QComboBox(this); theme_->addItems({"Clair","Bleu","Sombre"});
+    theme_=new QComboBox(this); theme_->setObjectName("slideTheme"); theme_->addItems({"Clair","Bleu","Sombre"});
     options->addWidget(theme_);
     options->addWidget(new QLabel("Transition :",this));
-    transition_=new QComboBox(this); transition_->addItems({"Aucune","Fondu","Glissement"});
+    transition_=new QComboBox(this); transition_->setObjectName("slideTransition"); transition_->addItems({"Aucune","Fondu","Glissement"});
     options->addWidget(transition_); options->addStretch(); root->addLayout(options);
     connect(theme_,&QComboBox::currentTextChanged,this,[this]{applyTheme();});
     auto *hint=new QLabel("Créez plusieurs diapositives, ajoutez des images et des notes, puis exportez la présentation en PDF.",this);
     hint->setWordWrap(true); root->addWidget(hint);
-    tabs_=new QTabWidget(this); root->addWidget(tabs_,1);
+    tabs_=new QTabWidget(this); tabs_->setObjectName("slidesTabs"); root->addWidget(tabs_,1);
     status_=new QLabel("Prêt",this); root->addWidget(status_);
     addSlide(); tabs_->setTabText(0,"Diapositive 1"); nextSlideNumber_=2;
 }
