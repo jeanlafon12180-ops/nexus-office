@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QTableWidget>
+#include <QTableWidget>\n#include <QTabWidget>
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -68,7 +68,21 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     connect(table_,&QTableWidget::cellChanged,this,[this]{recalculate();});
     setStyleSheet("QTableWidget{background:white;color:#172033;gridline-color:#dce3ed;selection-background-color:#cbd8ff} QHeaderView::section{background:#eef2f8;color:#263449;padding:6px;border:0}");
 }
-void SheetPage::newSheet(){table_->blockSignals(true);table_->clearContents();table_->setRowCount(30);table_->setColumnCount(12);table_->blockSignals(false);status_->setText("Nouveau tableau");}
+void SheetPage::newSheet()
+{
+    auto *sheet = new QTableWidget(30,12,tabs_);
+    sheet->setObjectName("sheetsTable");
+    sheet->setAlternatingRowColors(true);
+    sheet->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    sheet->verticalHeader()->setDefaultSectionSize(28);
+    connect(sheet,&QTableWidget::cellChanged,this,[this,sheet] {
+        if (table_ == sheet) recalculate();
+    });
+    const int index = tabs_->addTab(sheet, "Feuille " + QString::number(nextSheetNumber_++));
+    tabs_->setCurrentIndex(index);
+    table_ = sheet;
+    status_->setText("Nouvelle feuille ajoutée au classeur.");
+}
 void SheetPage::addRow(){table_->insertRow(table_->rowCount());}
 void SheetPage::addColumn(){table_->insertColumn(table_->columnCount());}
 QString SheetPage::cellValue(int row,int col,int depth) const {
