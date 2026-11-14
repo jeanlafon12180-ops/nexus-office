@@ -1,4 +1,4 @@
-name: Build desktop preview
+name: Build and package Nexus Office
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   linux-qt-build:
+    name: Linux build and tests
     runs-on: ubuntu-24.04
     steps:
       - name: Check out source
@@ -27,3 +28,69 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
+
+  windows-installer:
+    name: Windows 10/11 installer
+    runs-on: windows-2022
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Bundle Qt runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item "build/Release/nexus-office.exe" "dist/nexus-office.exe"
+          windeployqt --release --compiler-runtime --dir dist "dist/nexus-office.exe"
+          if (-not (Test-Path "dist/nexus-office.exe")) {
+            throw "The Nexus Office executable was not generated."
+          }
+
+      - name: Create portable ZIP
+        shell: pwsh
+        run: Compress-Archive -Path "dist/*" -DestinationPath "NexusOffice-Portable-Windows-x64.zip" -Force
+
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "Inno Setup compiler not found." }
+          & $iscc "installer/windows/NexusOffice.iss" "/DSourceDir=$((Get-Location).Path)\dist" "/DOutputDir=$((Get-Location).Path)"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexusOffice-Windows-Installer
+          path: NexusOffice-Setup-0.2.0-x64.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload portable fallback
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexusOffice-Windows-Portable
+          path: NexusOffice-Portable-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
