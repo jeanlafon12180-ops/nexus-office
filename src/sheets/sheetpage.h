@@ -1,13 +1,13 @@
 #pragma once
 #include <QWidget>
-class QTableWidget;
+class QTableWidget;\nclass QTabWidget;
 class QLabel;
 class SheetPage final : public QWidget {
     Q_OBJECT
 public:
     explicit SheetPage(QWidget *parent = nullptr);
 private:
-    QTableWidget *table_ = nullptr;
+    QTableWidget *table_ = nullptr;\n    QTabWidget *tabs_ = nullptr;\n    int nextSheetNumber_ = 2;
     QLabel *status_ = nullptr;
     void newSheet();
     void openCsv();
