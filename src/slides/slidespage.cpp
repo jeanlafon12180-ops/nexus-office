@@ -32,6 +32,10 @@
 #include <QTextStream>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QCoreApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
@@ -227,80 +231,81 @@ void SlidesPage::importPptx()
     const QString path=QFileDialog::getOpenFileName(this,"Importer une présentation PowerPoint",QString(),"PowerPoint (*.pptx)");
     if(path.isEmpty())return;
     const QString soffice=QStandardPaths::findExecutable("soffice");
-    if(soffice.isEmpty()){QMessageBox::warning(this,"Import PPTX","LibreOffice Impress est nécessaire pour importer un PPTX.");return;}
-    QTemporaryDir temp;
-    if(!temp.isValid())return;
-    QProcess process;
-    process.start(soffice,{"-env:UserInstallation="+QUrl::fromLocalFile(temp.filePath("profile")).toString(),
-        "--headless","--convert-to","fodp","--outdir",temp.path(),path});
-    if(!process.waitForStarted(5000)||!process.waitForFinished(60000)||process.exitCode()!=0){
-        QMessageBox::warning(this,"Import PPTX",QString::fromLocal8Bit(process.readAllStandardError()));return;
+    const QString python=QStandardPaths::findExecutable("python3");
+    if(soffice.isEmpty()||python.isEmpty()){QMessageBox::warning(this,"Import PPTX","LibreOffice Impress et Python 3 sont nécessaires pour importer un PPTX.");return;}
+    QTemporaryDir temp;if(!temp.isValid())return;
+    const QString profile=temp.filePath("profile");
+    QProcess convert;
+    convert.start(soffice,{"-env:UserInstallation="+QUrl::fromLocalFile(profile).toString(),"--headless","--convert-to","odp","--outdir",temp.path(),path});
+    if(!convert.waitForStarted(5000)||!convert.waitForFinished(60000)||convert.exitCode()!=0){
+        QMessageBox::warning(this,"Import PPTX",QString::fromLocal8Bit(convert.readAllStandardError()));return;
     }
-    QFile file(temp.filePath(QFileInfo(path).completeBaseName()+".fodp"));
-    if(!file.open(QIODevice::ReadOnly|QIODevice::Text)){QMessageBox::warning(this,"Import PPTX","Le fichier de conversion FODP est introuvable.");return;}
-    QXmlStreamReader xml(&file);
+    const QString odp=temp.filePath(QFileInfo(path).completeBaseName()+".odp");
+    const QString xmlPath=temp.filePath("content.xml");
+    QProcess extract;
+    extract.start(python,{QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py","extract",odp,xmlPath});
+    if(!extract.waitForStarted(5000)||!extract.waitForFinished(15000)||extract.exitCode()!=0){
+        QMessageBox::warning(this,"Import PPTX","Impossible d'extraire le contenu de la présentation.");return;
+    }
+    QFile xmlFile(xmlPath);if(!xmlFile.open(QIODevice::ReadOnly)){QMessageBox::warning(this,"Import PPTX","Contenu du classeur introuvable.");return;}
+    QXmlStreamReader xml(&xmlFile);
     QVector<QPair<QString,QString>> imported;
-    bool inPage=false; QString title,body; bool titleSeen=false;
+    bool inPage=false;QString title,body;bool firstParagraph=true;
     while(!xml.atEnd()){
         xml.readNext();
         if(xml.isStartElement()&&xml.name().toString()=="page"){
-            inPage=true;title.clear();body.clear();titleSeen=false;
-        } else if(inPage&&xml.isStartElement()&&xml.name().toString()=="p"){
+            inPage=true;title.clear();body.clear();firstParagraph=true;
+        }else if(inPage&&xml.isStartElement()&&xml.name().toString()=="p"){
             const QString text=xml.readElementText();
-            if(!titleSeen){title=text;titleSeen=true;}else{if(!body.isEmpty())body+="\n";body+=text;}
-        } else if(xml.isEndElement()&&xml.name().toString()=="page"&&inPage){
+            if(firstParagraph){title=text;firstParagraph=false;}
+            else{if(!body.isEmpty())body+="\n";body+=text;}
+        }else if(xml.isEndElement()&&xml.name().toString()=="page"&&inPage){
             imported.push_back({title,body});inPage=false;
         }
     }
-    if(xml.hasError()||imported.isEmpty()){QMessageBox::warning(this,"Import PPTX","Impossible de lire les diapositives du PPTX converti.");return;}
+    if(xml.hasError()||imported.isEmpty()){QMessageBox::warning(this,"Import PPTX","Aucune diapositive lisible trouvée dans ce PPTX.");return;}
     for(auto &slide:slides_){tabs_->removeTab(tabs_->indexOf(slide.page));slide.page->deleteLater();}
     slides_.clear();
     for(const auto &entry:imported){
-        addSlide();
-        Slide *slide=currentSlide();
-        slide->title->setText(entry.first);
-        slide->body->setPlainText(entry.second);
+        addSlide();Slide *slide=currentSlide();slide->title->setText(entry.first);slide->body->setPlainText(entry.second);
     }
     status_->setText(QString("Importées : %1 diapositives (texte)").arg(imported.size()));
 }
 
 void SlidesPage::exportPptx()
 {
-    const QString path=QFileDialog::getSaveFileName(this,"Exporter PowerPoint", "Presentation.pptx","PowerPoint (*.pptx)");
+    const QString path=QFileDialog::getSaveFileName(this,"Exporter PowerPoint","Presentation.pptx","PowerPoint (*.pptx)");
     if(path.isEmpty())return;
     QString output=path;if(QFileInfo(output).suffix().isEmpty())output+=".pptx";
     const QString soffice=QStandardPaths::findExecutable("soffice");
-    if(soffice.isEmpty()){QMessageBox::warning(this,"Export PPTX","LibreOffice Impress est nécessaire pour exporter un PPTX.");return;}
+    const QString python=QStandardPaths::findExecutable("python3");
+    if(soffice.isEmpty()||python.isEmpty()){QMessageBox::warning(this,"Export PPTX","LibreOffice Impress et Python 3 sont nécessaires pour exporter un PPTX.");return;}
     QTemporaryDir temp;if(!temp.isValid())return;
-    QString fodp="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-      "<office:document xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" "
-      "xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" "
-      "xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" "
-      "office:version=\"1.2\" office:mimetype=\"application/vnd.oasis.opendocument.presentation\" office:class=\"presentation\"><office:automatic-styles/><office:master-styles/><office:body><office:presentation>";
-    for(int i=0;i<slides_.size();++i){
-        const auto &slide=slides_[i];
-        fodp+="<draw:page draw:name=\"Slide"+QString::number(i+1)+"\" draw:master-page-name=\"Default\">";
-        fodp+="<draw:frame><draw:text-box><text:p>"+slide.title->text().toHtmlEscaped()+"</text:p>";
-        const QStringList lines=slide.body->toPlainText().split('\n');
-        for(const QString &line:lines)fodp+="<text:p>"+line.toHtmlEscaped()+"</text:p>";
-        fodp+="</draw:text-box></draw:frame></draw:page>";
+    QJsonArray data;
+    for(const auto &slide:slides_){
+        QJsonObject item;item["title"]=slide.title->text();item["body"]=slide.body->toPlainText();data.append(item);
     }
-    fodp+="</office:presentation></office:body></office:document>";
-    const QString input=temp.filePath("NexusSlides.fodp");
-    QFile file(input);if(!file.open(QIODevice::WriteOnly|QIODevice::Text))return;
-    file.write(fodp.toUtf8());file.close();
-    QProcess process;
-    process.start(soffice,{"-env:UserInstallation="+QUrl::fromLocalFile(temp.filePath("profile")).toString(),
-        "--headless","--convert-to","pptx","--outdir",temp.path(),input});
-    if(!process.waitForStarted(5000)||!process.waitForFinished(60000)||process.exitCode()!=0){
-        QMessageBox::warning(this,"Export PPTX",QString::fromLocal8Bit(process.readAllStandardError()));return;
+    const QString jsonPath=temp.filePath("slides.json");
+    QFile jsonFile(jsonPath);if(!jsonFile.open(QIODevice::WriteOnly)){QMessageBox::warning(this,"Export PPTX","Impossible de préparer les diapositives.");return;}
+    jsonFile.write(QJsonDocument(data).toJson());jsonFile.close();
+    const QString helper=QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py";
+    const QString odp=temp.filePath("NexusSlides.odp");
+    QProcess build;
+    build.start(python,{helper,"create",jsonPath,odp});
+    if(!build.waitForStarted(5000)||!build.waitForFinished(15000)||build.exitCode()!=0){
+        QMessageBox::warning(this,"Export PPTX","Impossible de préparer le fichier de présentation intermédiaire.");return;
+    }
+    QProcess convert;
+    convert.start(soffice,{"-env:UserInstallation="+QUrl::fromLocalFile(temp.filePath("profile")).toString(),"--headless","--convert-to","pptx","--outdir",temp.path(),odp});
+    if(!convert.waitForStarted(5000)||!convert.waitForFinished(60000)||convert.exitCode()!=0){
+        QMessageBox::warning(this,"Export PPTX",QString::fromLocal8Bit(convert.readAllStandardError()));return;
     }
     const QString generated=temp.filePath("NexusSlides.pptx");
     if(QFileInfo::exists(output))QFile::remove(output);
     if(!QFileInfo::exists(generated)||!QFile::copy(generated,output)){
         QMessageBox::warning(this,"Export PPTX","Le fichier PPTX n'a pas pu être créé.");return;
     }
-    status_->setText("Export PowerPoint terminé (texte des diapositives).");
+    status_->setText("Export PowerPoint terminé (titres et texte).");
 }
 
 void SlidesPage::exportPdf()
