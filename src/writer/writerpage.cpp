@@ -1,7 +1,6 @@
 #include "writerpage.h"
 
 #include <QAction>
-#include <QComboBox>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -10,7 +9,11 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
-#include <QPushButton>\n#include <QProcess>\n#include <QStandardPaths>\n#include <QTemporaryDir>\n#include <QDir>
+#include <QPushButton>
+#include <QProcess>
+#include <QStandardPaths>
+#include <QTemporaryDir>
+#include <QDir>
 #include <QRegularExpression>
 #include <QSpinBox>
 #include <QTextEdit>
@@ -54,7 +57,8 @@ bool convertWithLibreOffice(const QStringList &args, QString *error)
     return true;
 }
 }
-\nWriterPage::WriterPage(QWidget *parent)
+
+WriterPage::WriterPage(QWidget *parent)
     : QWidget(parent)
 {
     auto *layout = new QVBoxLayout(this);
@@ -178,7 +182,9 @@ bool convertWithLibreOffice(const QStringList &args, QString *error)
             });
 
     setStyleSheet(R"(
-        QLabel { background: transparent; border: 0; }\n        QLabel#writerHeading { font-size: 27px; font-weight: 750; color: #172033; }
+        QLabel { background: transparent; border: 0; }
+        QLabel { background: transparent; border: 0; }
+        QLabel#writerHeading { font-size: 27px; font-weight: 750; color: #172033; }
         QLabel#writerNotice {
             background: #eaf1ff; color: #294b82;
             border: 1px solid #d5e2ff; border-radius: 8px; padding: 10px 12px;
@@ -258,7 +264,8 @@ void WriterPage::openDocument()
     } else {
         QFile file(path);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Ouverture impossible", "Le fichier n’a pas pu être ouvert :\\n" + file.errorString());
+            QMessageBox::critical(this, "Ouverture impossible", "Le fichier n’a pas pu être ouvert :\
+" + file.errorString());
             return;
         }
         QTextStream stream(&file);
@@ -336,7 +343,8 @@ bool WriterPage::saveToFile(const QString &path)
     } else {
         QFile file(path);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Enregistrement impossible", "Le fichier n’a pas pu être enregistré :\\n" + file.errorString());
+            QMessageBox::critical(this, "Enregistrement impossible", "Le fichier n’a pas pu être enregistré :\
+" + file.errorString());
             return false;
         }
         QTextStream stream(&file);
