@@ -44,7 +44,10 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Étape 2 — terminer Nexus Sheets
 
-- [ ] Construire un moteur de calcul plus complet
+- [x] Afficher les résultats des formules directement dans les cellules
+- [x] Ajouter un moteur de formules avec priorités opératoires, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX et COUNT
+- [ ] Valider le nouveau moteur de formules dans la CI
+- [ ] Construire un moteur de calcul plus complet (fonctions supplémentaires, gestion avancée des erreurs et références)
 - [ ] Ajouter import/export XLSX
 - [ ] Ajouter plusieurs feuilles, graphiques, tris et filtres
 
