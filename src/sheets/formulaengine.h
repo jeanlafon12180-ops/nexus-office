@@ -81,13 +81,12 @@ private:
         }
         bool ok = false;
         const QString raw = resolve_(row, column).trimmed();
+        QString computed = raw;
         if (raw.startsWith('=')) {
-            const QString result = evaluate(raw, resolve_);
-            if (result.startsWith('#')) { fail(result); return 0; }
-            const double value = result.toDouble(&ok);
-        } else {
-            const double value = raw.toDouble(&ok);
+            computed = evaluate(raw, resolve_);
+            if (computed.startsWith('#')) { fail(computed); return 0; }
         }
+        const double value = computed.toDouble(&ok);
         if (!ok) { fail("#VALEUR!"); return 0; }
         return value;
     }
