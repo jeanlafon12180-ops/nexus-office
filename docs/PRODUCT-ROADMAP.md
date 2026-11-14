@@ -1,38 +1,26 @@
-# Product roadmap
+# Feuille de route Nexus Office
 
-## Product direction
+## Prototype desktop 0.2.x
 
-Nexus Office is a desktop-first office suite. The primary product is an application installed and run locally on the user's computer. A future browser-based edition is a separate, later project.
+- [x] Interface Qt avec navigation et thèmes clair/sombre
+- [x] Writer : édition riche de HTML et texte
+- [x] Writer : conversion DOCX via LibreOffice installé séparément
+- [x] Sheets : grille éditable et import/export CSV
+- [x] Sheets : formules simples (opérations directes, références et SUM)
+- [x] Slides : édition d'une diapositive simple et export PDF
+- [x] PDF : ouverture avec le lecteur PDF du système
+- [x] CI Linux et Windows avec génération de paquets Windows
 
-## Phase 1 — Real desktop editor
+## Prochaines étapes
 
-- [x] Build an initial rich-text Writer prototype for HTML and plain-text files.
-- [ ] Pin and validate a LibreOfficeKit version.
-- [ ] Implement the LibreOfficeKit backend behind the Nexus document-engine interface.
-- [ ] Build a Writer canvas with tiled rendering and keyboard/mouse input.
-- [ ] Implement save and save-as workflows.
-- [ ] Test document round-tripping and error handling.
+- [ ] Tester le cycle ouverture/modification/enregistrement DOCX sur des documents réels
+- [ ] Afficher les résultats de formules directement dans les cellules et améliorer le moteur de calcul
+- [ ] Ajouter le format XLSX natif et les fonctions de feuille avancées
+- [ ] Ajouter plusieurs diapositives, thèmes, images et export PPTX
+- [ ] Intégrer un lecteur PDF avec navigation, recherche et annotations
+- [ ] Ajouter des tests automatisés fonctionnels pour chaque module
+- [ ] Valider l'installation sur Windows 10/11 et Linux ; étudier la distribution macOS
 
-The initial Writer prototype is not yet a Word-compatible editor. DOCX support remains blocked on the LibreOfficeKit backend and round-trip tests.
+## Limites connues
 
-## Phase 2 — Desktop suite
-
-- [ ] Add Sheets.
-- [ ] Add Slides.
-- [ ] Add PDF viewing and export workflows.
-- [ ] Improve settings, recent files, and accessibility.
-
-## Phase 3 — Distribution website
-
-The official website will present the product and offer platform-specific installers. The download buttons must only be enabled when signed/release artifacts have actually been built and tested.
-
-Planned download targets:
-- Windows: installer package (for example, .exe or .msi).
-- Linux: distribution packages such as .deb and/or AppImage, selected after dependency testing.
-- macOS: signed application bundle distributed in a .dmg.
-
-Each release should display its version, supported operating systems, architecture, file size, release notes, and checksum. The website must never link to placeholder or nonexistent installers.
-
-## Phase 4 — Future online edition
-
-A browser edition may be considered after the desktop product is stable. It will require its own architecture for document storage, authentication, collaboration, privacy, and server-side execution. It is not part of the initial desktop release.
+Le tableur gère actuellement le CSV, pas le format XLSX. Slides crée une seule page et exporte en PDF, pas en PPTX. Le module PDF délègue l'ouverture au lecteur système. La prise en charge DOCX utilise LibreOffice installé sur le poste et ne garantit pas encore une fidélité parfaite de mise en page.
