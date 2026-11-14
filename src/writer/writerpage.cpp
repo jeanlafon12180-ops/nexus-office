@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QSaveFile>
 #include <QInputDialog>
+#include <QLineEdit>
+#include <QTextCursor>
 #include <QKeySequence>
 #include <QPrinter>
 #include <QPrintDialog>
@@ -307,16 +309,16 @@ void WriterPage::saveDocument()
 void WriterPage::saveDocumentAs()
 {
     const QString path = QFileDialog::getSaveFileName(
-        this, "Enregistrer le document", currentFile_.isEmpty()
-            ? "Document sans titre.html" : currentFile_,
+        this, "Enregistrer le document",
+        currentFile_.isEmpty() ? "Document sans titre.html" : currentFile_,
         "Document Word (*.docx);;Document HTML (*.html);;Fichier texte (*.txt);;Markdown (*.md)");
 
     if (path.isEmpty())
         return;
 
     QString finalPath = path;
-    if (QFileInfo(finalPath).suffix().isEmpty()) {
-        const QString selected = QFileDialog::getSaveFileName; // placeholder
+    if (QFileInfo(finalPath).suffix().isEmpty())
+        finalPath += ".html";
 
     if (saveToFile(finalPath)) {
         currentFile_ = finalPath;
@@ -360,17 +362,19 @@ bool WriterPage::saveToFile(const QString &path)
             return false;
         }
     } else {
-        QFile file(path);
+        QSaveFile file(path);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QMessageBox::critical(this, "Enregistrement impossible", "Le fichier n’a pas pu être enregistré :\
-" + file.errorString());
+            QMessageBox::critical(this, "Enregistrement impossible", "Le fichier n’a pas pu être enregistré :\n" + file.errorString());
             return false;
         }
         QTextStream stream(&file);
         if (suffix == "html" || suffix == "htm") stream << editor_->toHtml();
         else if (suffix == "md" || suffix == "markdown") stream << editor_->document()->toMarkdown();
         else stream << editor_->toPlainText();
-        file.close();
+        if (!file.commit()) {
+            QMessageBox::critical(this, "Enregistrement impossible", "Impossible de finaliser l’enregistrement :\n" + file.errorString());
+            return false;
+        }
     }
     editor_->document()->setModified(false);
     updateDocumentInfo();
