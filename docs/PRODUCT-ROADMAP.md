@@ -46,10 +46,17 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 - [x] Afficher les résultats des formules directement dans les cellules
 - [x] Ajouter un moteur de formules avec priorités opératoires, parenthèses, références de cellules et fonctions SUM, AVERAGE, MIN, MAX et COUNT
-- [ ] Valider le nouveau moteur de formules dans la CI
-- [ ] Construire un moteur de calcul plus complet (fonctions supplémentaires, gestion avancée des erreurs et références)
-- [ ] Ajouter import/export XLSX
-- [ ] Ajouter plusieurs feuilles, graphiques, tris et filtres
+- [x] Valider le moteur de formules dans la CI (arithmétique, priorités, parenthèses, références, fonctions et erreurs)
+- [x] Ajouter un premier ensemble de fonctions : SUM, AVERAGE, MIN, MAX et COUNT
+- [x] Ajouter l'import et l'export XLSX via LibreOffice (feuille active uniquement)
+- [x] Ajouter plusieurs feuilles dans l'interface
+- [x] Ajouter le tri et le filtrage des lignes
+- [x] Ajouter un aperçu de graphique en colonnes
+- [ ] Étendre le moteur de calcul (fonctions supplémentaires, références inter-feuilles et gestion avancée des erreurs)
+- [ ] Enregistrer et restaurer toutes les feuilles dans un même classeur XLSX
+- [ ] Créer des graphiques persistants et modifiables dans le classeur
+
+**Étape 2 terminée au niveau MVP.** Les fonctions de base du tableur sont disponibles et le build ainsi que les tests du moteur de formules passent dans la CI. Les classeurs XLSX multi-feuilles et les graphiques persistants restent des améliorations à réaliser.
 
 ## Étape 3 — terminer Nexus Slides
 
@@ -84,4 +91,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets ne prend pas encore en charge XLSX. Slides ne gère qu'une diapositive et n'exporte pas PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides ne gère qu'une diapositive et n'exporte pas PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
