@@ -376,7 +376,7 @@ bool WriterPage::saveToFile(const QString &path)
         stream << editor_->toHtml();
         html.close();
         QString error;
-        if (!convertWithLibreOffice({"--headless", "--convert-to", "docx", "--outdir", temp.path(), htmlPath}, &error)) {
+        if (!convertWithLibreOffice({"--headless", "--convert-to", "docx:Office Open XML Text", "--outdir", temp.path(), htmlPath}, &error)) {
             QMessageBox::critical(this, "Enregistrement DOCX impossible", error);
             return false;
         }
