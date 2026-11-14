@@ -1,4 +1,5 @@
 #include "sheetpage.h"
+#include "formulaengine.h"
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -49,29 +50,16 @@ void SheetPage::newSheet(){table_->blockSignals(true);table_->clearContents();ta
 void SheetPage::addRow(){table_->insertRow(table_->rowCount());}
 void SheetPage::addColumn(){table_->insertColumn(table_->columnCount());}
 QString SheetPage::cellValue(int row,int col,int depth) const {
-    if(depth>20 || row<0 || col<0 || row>=table_->rowCount() || col>=table_->columnCount()) return "0";
-    auto *item=table_->item(row,col); if(!item) return "0";
-    QString raw=item->data(Qt::EditRole).toString().trimmed(); if(!raw.startsWith('=')) return raw;
-    raw=raw.mid(1).trimmed();
-    auto colIndex=[](const QString &letters){int n=0;for(QChar ch:letters.toUpper()){if(!ch.isLetter())return -1;n=n*26+ch.unicode()-QChar('A').unicode()+1;}return n-1;};
-    QRegularExpression sum("^SUM\\(([A-Z]+)([0-9]+):([A-Z]+)([0-9]+)\\)$",QRegularExpression::CaseInsensitiveOption);
-    auto sm=sum.match(raw);
-    if(sm.hasMatch()){
-        int c1=colIndex(sm.captured(1)),r1=sm.captured(2).toInt()-1,c2=colIndex(sm.captured(3)),r2=sm.captured(4).toInt()-1;
-        double total=0; for(int rr=qMin(r1,r2);rr<=qMax(r1,r2);++rr)for(int cc=qMin(c1,c2);cc<=qMax(c1,c2);++cc) total+=cellValue(rr,cc,depth+1).toDouble();
-        return QString::number(total);
-    }
-    QRegularExpression ref("^([A-Z]+)([0-9]+)([+*/-])([A-Z]+)([0-9]+)$",QRegularExpression::CaseInsensitiveOption);
-    auto rm=ref.match(raw);
-    if(rm.hasMatch()){
-        double a=cellValue(rm.captured(2).toInt()-1,colIndex(rm.captured(1)),depth+1).toDouble();
-        double b=cellValue(rm.captured(5).toInt()-1,colIndex(rm.captured(4)),depth+1).toDouble();
-        QString op=rm.captured(3); if(op=="+")return QString::number(a+b);if(op=="-")return QString::number(a-b);if(op=="*")return QString::number(a*b);return b==0?"#DIV/0!":QString::number(a/b);
-    }
-    QRegularExpression literal("^(-?[0-9]+(?:\\.[0-9]+)?)([+*/-])(-?[0-9]+(?:\\.[0-9]+)?)$");
-    auto lm=literal.match(raw);
-    if(lm.hasMatch()){double a=lm.captured(1).toDouble(),b=lm.captured(3).toDouble();QString op=lm.captured(2);if(op=="+")return QString::number(a+b);if(op=="-")return QString::number(a-b);if(op=="*")return QString::number(a*b);return b==0?"#DIV/0!":QString::number(a/b);}
-    return "#FORMULE!";
+    if (depth > 20) return "#CYCLE!";
+    if (row < 0 || col < 0 || row >= table_->rowCount() || col >= table_->columnCount())
+        return "#REF!";
+    const auto *item = table_->item(row, col);
+    if (!item) return "0";
+    const QString raw = item->data(Qt::EditRole).toString().trimmed();
+    if (!raw.startsWith('=')) return raw.isEmpty() ? "0" : raw;
+    return nexus::sheets::FormulaEngine::evaluate(raw, [this, depth](int refRow, int refColumn) {
+        return cellValue(refRow, refColumn, depth + 1);
+    });
 }
 void SheetPage::recalculate(){
     table_->blockSignals(true);
@@ -88,7 +76,7 @@ void SheetPage::recalculate(){
         }
     }
     table_->blockSignals(false);
-    status_->setText("Tableau modifié · les formules s’affichent dans l’infobulle des cellules");
+    status_->setText("Tableau recalculé · résultats des formules affichés dans les cellules");
 }
 void SheetPage::openCsv(){
     const QString path=QFileDialog::getOpenFileName(this,"Ouvrir un CSV",QString(),"Fichiers CSV (*.csv);;Tous les fichiers (*)");if(path.isEmpty())return;
