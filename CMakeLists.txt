@@ -80,6 +80,7 @@ if(BUILD_TESTING)
         src/writer/writerpage.h
     )
     target_link_libraries(writer-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test)
+    target_include_directories(writer-ui-tests PRIVATE ${CMAKE_SOURCE_DIR}/src/writer)
     add_test(NAME writer-ui-regression COMMAND writer-ui-tests)
     set_tests_properties(writer-ui-regression PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
