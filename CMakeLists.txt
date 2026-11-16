@@ -81,8 +81,19 @@ if(BUILD_TESTING)
     )
     target_link_libraries(writer-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test)
     target_include_directories(writer-ui-tests PRIVATE ${CMAKE_SOURCE_DIR}/src/writer)
+    target_include_directories(writer-ui-tests PRIVATE ${CMAKE_SOURCE_DIR}/src/writer)
     add_test(NAME writer-ui-regression COMMAND writer-ui-tests)
     set_tests_properties(writer-ui-regression PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+    qt_add_executable(sheets-ui-tests
+        tests/sheets_ui_test.cpp
+        src/sheets/sheetpage.cpp
+        src/sheets/sheetpage.h
+    )
+    target_link_libraries(sheets-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport)
+    target_include_directories(sheets-ui-tests PRIVATE ${CMAKE_SOURCE_DIR}/src/sheets)
+    add_test(NAME sheets-ui-regression COMMAND sheets-ui-tests)
+    set_tests_properties(sheets-ui-regression PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
     add_executable(formulaengine-tests tests/formulaengine_test.cpp)
     target_link_libraries(formulaengine-tests PRIVATE Qt6::Core)
