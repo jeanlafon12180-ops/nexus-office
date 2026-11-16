@@ -67,6 +67,8 @@ jobs:
           cmake --install build --prefix dist
           APP="dist/nexus-office.app"
           test -d "$APP"
+          mkdir -p "$APP/Contents/share/nexus-office"
+          cp dist/share/nexus-office/slides_odp.py "$APP/Contents/share/nexus-office/"
           macdeployqt "$APP" -always-overwrite
           mkdir -p dist-output
           hdiutil create -volname "Nexus Office" -srcfolder "$APP" -ov -format UDZO "dist-output/NexusOffice-macOS.dmg"
