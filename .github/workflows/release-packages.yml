@@ -39,7 +39,9 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist-output | Out-Null
-          iscc /DSourceDir="dist\bin" /DHelperDir="dist\share\nexus-office" /DOutputDir="dist-output" installer/windows/NexusOffice.iss
+          $source = Join-Path $env:GITHUB_WORKSPACE "dist\bin"
+          $output = Join-Path $env:GITHUB_WORKSPACE "dist-output"
+          iscc "/DSourceDir=$source" "/DOutputDir=$output" installer/windows/NexusOffice.iss
       - uses: actions/upload-artifact@v4
         with:
           name: NexusOffice-Windows-x64
@@ -47,7 +49,7 @@ jobs:
           if-no-files-found: error
 
   macos-disk-image:
-    name: macOS x86_64 disk image
+    name: macOS disk image
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +67,7 @@ jobs:
       - name: Deploy Qt and create DMG
         run: |
           cmake --install build --prefix dist
-          APP="dist/nexus-office.app"
+          APP="dist/bin/nexus-office.app"
           test -d "$APP"
           mkdir -p "$APP/Contents/share/nexus-office"
           cp dist/share/nexus-office/slides_odp.py "$APP/Contents/share/nexus-office/"
