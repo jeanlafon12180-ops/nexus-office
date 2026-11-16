@@ -22,6 +22,8 @@
 #include <QPdfWriter>
 #include <QPainter>
 #include <QPageSize>
+#include <QPageLayout>
+#include <QSettings>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QTextEdit>
@@ -355,6 +357,10 @@ void PdfPage::printPdf()
 {
     if (document_->status() != QPdfDocument::Status::Ready) return;
     QPrinter printer(QPrinter::HighResolution);
+    QSettings preferences;
+    const QString paper=preferences.value("document/paperSize", "A4").toString();
+    printer.setPageSize(QPageSize(paper=="A3" ? QPageSize::A3 : paper=="Letter" ? QPageSize::Letter : QPageSize::A4));
+    printer.setPageOrientation(preferences.value("document/orientation", "Portrait").toString()=="Paysage" ? QPageLayout::Landscape : QPageLayout::Portrait);
     QPrintDialog dialog(&printer, this);
     dialog.setWindowTitle("Imprimer le PDF");
     if (dialog.exec() != QDialog::Accepted) return;
