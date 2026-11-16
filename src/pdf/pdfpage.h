@@ -26,6 +26,8 @@ private:
     QComboBox *zoomCombo_ = nullptr;
     QLineEdit *searchEdit_ = nullptr;
     QPushButton *notesButton_ = nullptr;
+    QPushButton *highlightButton_ = nullptr;
+    QPushButton *exportButton_ = nullptr;
     QString currentPath_;
     int lastSearchPage_ = -1;
 
@@ -33,6 +35,9 @@ private:
     void updateDocumentState();
     void findNext();
     void editPageNote();
+    void highlightText();
+    void exportAnnotatedPdf();
     void printPdf();
     QString notesPath() const;
+    QString highlightsPath() const;
 };
