@@ -14,6 +14,9 @@ class SlidesPage final : public QWidget {
     Q_OBJECT
 public:
     explicit SlidesPage(QWidget *parent = nullptr);
+
+signals:
+    void documentOpened(const QString &path, const QString &module);
 private:
     struct Slide { QWidget *page=nullptr; QLineEdit *title=nullptr; QTextEdit *body=nullptr; QTextEdit *notes=nullptr; };
     QVector<Slide> slides_;
