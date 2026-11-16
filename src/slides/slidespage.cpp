@@ -260,7 +260,8 @@ void SlidesPage::importPptx()
     const QString odp=temp.filePath(QFileInfo(path).completeBaseName()+".odp");
     const QString xmlPath=temp.filePath("content.xml");
     QProcess extract;
-    QString helper=QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py";
+    QString helper=QCoreApplication::applicationDirPath()+"/share/nexus-office/slides_odp.py";
+    if(!QFileInfo::exists(helper))helper=QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py";
     if(!QFileInfo::exists(helper))helper=QString::fromUtf8(NEXUS_SLIDES_ODP_HELPER);
     extract.start(python,{helper,"extract",odp,xmlPath});
     if(!extract.waitForStarted(5000)||!extract.waitForFinished(15000)||extract.exitCode()!=0){
@@ -307,7 +308,8 @@ void SlidesPage::exportPptx()
     const QString jsonPath=temp.filePath("slides.json");
     QFile jsonFile(jsonPath);if(!jsonFile.open(QIODevice::WriteOnly)){QMessageBox::warning(this,"Export PPTX","Impossible de préparer les diapositives.");return;}
     jsonFile.write(QJsonDocument(data).toJson());jsonFile.close();
-    QString helper=QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py";
+    QString helper=QCoreApplication::applicationDirPath()+"/share/nexus-office/slides_odp.py";
+    if(!QFileInfo::exists(helper))helper=QCoreApplication::applicationDirPath()+"/../share/nexus-office/slides_odp.py";
     if(!QFileInfo::exists(helper))helper=QString::fromUtf8(NEXUS_SLIDES_ODP_HELPER);
     const QString odp=temp.filePath("NexusSlides.odp");
     QProcess build;
