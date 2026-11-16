@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QString>
+class QTimer;
 
 class QTextEdit;
 class QLabel;
@@ -22,6 +23,8 @@ private:
     QLabel *documentLabel_ = nullptr;
     QLabel *wordCountLabel_ = nullptr;
     QString currentFile_;
+    QTimer *recoveryTimer_ = nullptr;
+    QString recoveryFile_;
 
     bool maybeSave();
     bool saveToFile(const QString &path);
@@ -38,4 +41,7 @@ private:
     void insertList(bool numbered);
     void printDocument();
     void checkSpelling();
+    void writeRecoveryCopy();
+    void clearRecoveryCopy();
+    void showTemplates();
 };
