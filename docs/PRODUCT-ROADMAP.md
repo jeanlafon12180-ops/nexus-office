@@ -91,7 +91,7 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 - [x] Ajouter une première galerie de modèles bureautiques hors ligne pour Writer
 - [x] Ajouter un raccourci clavier commun Ctrl+, pour ouvrir les paramètres
 - [ ] Ajouter la gestion des préférences d'impression et d'export
-- [ ] Étudier la synchronisation et le partage de fichiers comme options facultatives, sans compte obligatoire
+- [x] Décider du périmètre de synchronisation et de partage : fonctionnement local hors ligne, sans compte ni cloud obligatoire ; partage par fichiers standards et services externes choisis par l’utilisateur
 
 ## Étape 6 — qualité et versions finales
 
@@ -103,7 +103,7 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Fonctions communes déjà intégrées
 
-Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. Writer possède une copie de récupération locale périodique (toutes les 15 secondes lorsque le document est modifié), proposée au prochain lancement. Une galerie de modèles Writer hors ligne propose une lettre, un CV, un rapport scolaire et une facture. Ces fonctions ne couvrent pas encore les classeurs Sheets ni les présentations Slides.
+Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. Writer possède une copie de récupération locale périodique (toutes les 15 secondes lorsque le document est modifié), proposée au prochain lancement. Une galerie de modèles Writer hors ligne propose une lettre, un CV, un rapport scolaire et une facture. Ces fonctions ne couvrent pas encore les classeurs Sheets ni les présentations Slides. La synchronisation cloud n’est pas intégrée au périmètre 0.2.x : les documents restent locaux et peuvent être partagés via leurs formats standards (DOCX, XLSX, PPTX, PDF, CSV) ou par un service externe choisi séparément par l’utilisateur.
 
 ## Limites connues
 
