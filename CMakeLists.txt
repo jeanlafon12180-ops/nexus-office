@@ -15,7 +15,7 @@ option(NEXUS_ENABLE_LIBREOFFICEKIT
     OFF
 )
 
-find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets PrintSupport)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets PrintSupport Pdf PdfWidgets)
 
 qt_standard_project_setup()
 
@@ -36,7 +36,7 @@ qt_add_executable(nexus-office
     src/document/unavailabledocumentengine.cpp
 )
 
-target_link_libraries(nexus-office PRIVATE Qt6::Widgets Qt6::PrintSupport)
+target_link_libraries(nexus-office PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Pdf Qt6::PdfWidgets)
 target_compile_definitions(nexus-office PRIVATE NEXUS_SLIDES_ODP_HELPER="${CMAKE_SOURCE_DIR}/tools/slides_odp.py")
 install(FILES tools/slides_odp.py DESTINATION share/nexus-office)
 
