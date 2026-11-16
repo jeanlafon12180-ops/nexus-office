@@ -15,13 +15,12 @@ int main(int argc, char **argv)
     const auto *zoom = page.findChild<QComboBox *>("pdfZoomCombo");
     if (!zoom || zoom->count() != 8) return 2;
     if (!page.findChild<QLineEdit *>("pdfSearchEdit")) return 3;
-    const auto *view = page.findChild<QWidget *>("pdfDocumentView");
-    if (!view) return 4;
+    if (!page.findChild<QWidget *>("pdfDocumentView")) return 4;
 
     const auto buttons = page.findChildren<QPushButton *>();
     QStringList labels;
     for (const auto *button : buttons) labels << button->text();
-    for (const QString &required : {"Ouvrir", "Suivant", "Commentaire", "Imprimer"})
+    for (const QString &required : {"Ouvrir", "Suivant", "Commentaire", "Surligner texte", "Exporter PDF annoté", "Imprimer"})
         if (!labels.contains(required)) return 5;
 
     qInfo() << "PDF UI structure test passed.";
