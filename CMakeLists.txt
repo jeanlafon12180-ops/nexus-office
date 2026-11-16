@@ -44,6 +44,10 @@ install(TARGETS nexus-office
     BUNDLE DESTINATION .
 )
 install(FILES tools/slides_odp.py DESTINATION share/nexus-office)
+if(UNIX AND NOT APPLE)
+    install(FILES installer/linux/nexus-office.desktop DESTINATION share/applications)
+    install(FILES src/assets/nexus-office.svg DESTINATION share/icons/hicolor/scalable/apps)
+endif()
 
 if(NEXUS_ENABLE_LIBREOFFICEKIT)
     find_path(LIBREOFFICEKIT_INCLUDE_DIR
