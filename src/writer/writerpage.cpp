@@ -16,6 +16,9 @@
 #include <QComboBox>
 #include <QKeySequence>
 #include <QPrinter>
+#include <QSettings>
+#include <QPageSize>
+#include <QPageLayout>
 #include <QPrintDialog>
 #include <QPageSetupDialog>
 #include <QFileDialog>
@@ -464,6 +467,10 @@ void WriterPage::exportPdf()
     if (path.isEmpty()) return;
     if (QFileInfo(path).suffix().isEmpty()) path += ".pdf";
     QPrinter printer(QPrinter::HighResolution);
+    QSettings preferences;
+    const QString paper=preferences.value("document/paperSize", "A4").toString();
+    printer.setPageSize(QPageSize(paper=="A3" ? QPageSize::A3 : paper=="Letter" ? QPageSize::Letter : QPageSize::A4));
+    printer.setPageOrientation(preferences.value("document/orientation", "Portrait").toString()=="Paysage" ? QPageLayout::Landscape : QPageLayout::Portrait);
     QPageSetupDialog pageSetup(&printer, this);
     pageSetup.setWindowTitle("Mise en page du PDF");
     if (pageSetup.exec() != QDialog::Accepted)
@@ -476,6 +483,10 @@ void WriterPage::exportPdf()
 void WriterPage::printDocument()
 {
     QPrinter printer(QPrinter::HighResolution);
+    QSettings preferences;
+    const QString paper=preferences.value("document/paperSize", "A4").toString();
+    printer.setPageSize(QPageSize(paper=="A3" ? QPageSize::A3 : paper=="Letter" ? QPageSize::Letter : QPageSize::A4));
+    printer.setPageOrientation(preferences.value("document/orientation", "Portrait").toString()=="Paysage" ? QPageLayout::Landscape : QPageLayout::Portrait);
     QPageSetupDialog pageSetup(&printer, this);
     pageSetup.setWindowTitle("Mise en page et impression");
     if (pageSetup.exec() != QDialog::Accepted) return;
