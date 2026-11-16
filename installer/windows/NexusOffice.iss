@@ -4,7 +4,10 @@
 #define AppExeName "nexus-office.exe"
 
 #ifndef SourceDir
-  #define SourceDir "..\\..\\dist"
+  #define SourceDir "..\\..\\dist\\bin"
+#endif
+#ifndef HelperDir
+  #define HelperDir "..\\..\\dist\\share\\nexus-office"
 #endif
 #ifndef OutputDir
   #define OutputDir "..\\.."
