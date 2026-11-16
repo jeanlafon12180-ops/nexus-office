@@ -39,7 +39,7 @@ qt_add_executable(nexus-office
 
 target_link_libraries(nexus-office PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Pdf Qt6::PdfWidgets)
 target_compile_definitions(nexus-office PRIVATE NEXUS_SLIDES_ODP_HELPER="${CMAKE_SOURCE_DIR}/tools/slides_odp.py")
-install(FILES tools/slides_odp.py DESTINATION share/nexus-office)
+install(TARGETS nexus-office\n    RUNTIME DESTINATION bin\n    BUNDLE DESTINATION .\n)\ninstall(FILES tools/slides_odp.py DESTINATION share/nexus-office)
 
 if(NEXUS_ENABLE_LIBREOFFICEKIT)
     find_path(LIBREOFFICEKIT_INCLUDE_DIR
@@ -134,3 +134,18 @@ set_target_properties(nexus-office PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
+
+include(InstallRequiredSystemLibraries)
+set(CPACK_PACKAGE_NAME "nexus-office")
+set(CPACK_PACKAGE_VENDOR "Nexus")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Suite bureautique Nexus Office")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_CONTACT "Nexus Office maintainers")
+set(CPACK_PACKAGE_FILE_NAME "nexus-office-${PROJECT_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
+if(UNIX AND NOT APPLE)
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Nexus Office")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "office")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6widgets6, libqt6printsupport6, libqt6pdf6, libqt6pdfwidgets6")
+endif()
+include(CPack)
