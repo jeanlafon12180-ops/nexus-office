@@ -76,10 +76,11 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Étape 4 — terminer Nexus PDF
 
-- [ ] Intégrer un lecteur PDF dans l'application
-- [ ] Ajouter navigation, recherche et zoom
-- [ ] Ajouter annotations, surlignage et commentaires
-- [ ] Ajouter impression et export
+- [x] Intégrer un lecteur PDF dans l'application avec Qt PDF
+- [x] Ajouter navigation entre les pages, recherche textuelle et zoom
+- [x] Ajouter des commentaires par page enregistrés dans un fichier annexe JSON
+- [x] Ajouter l'impression du document PDF
+- [ ] Ajouter le surlignage persistant et l'export des annotations dans le PDF
 
 ## Étape 5 — fonctions communes et différenciantes
 
@@ -100,4 +101,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides propose un diaporama avec transitions et un import/export PPTX de base via LibreOffice. Le passage PPTX ne conserve actuellement que les titres et le texte des diapositives ; les éléments riches (images, tableaux, formes, notes, thèmes et animations) ne sont pas encore préservés. Le module nécessite LibreOffice Impress et Python 3 pour l'échange PPTX. Le module PDF délègue encore l'ouverture au lecteur du système. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides propose un diaporama avec transitions et un import/export PPTX de base via LibreOffice. Le passage PPTX ne conserve actuellement que les titres et le texte des diapositives ; les éléments riches (images, tableaux, formes, notes, thèmes et animations) ne sont pas encore préservés. Le module nécessite LibreOffice Impress et Python 3 pour l'échange PPTX. Le module PDF intègre un lecteur Qt PDF, la navigation, le zoom, la recherche textuelle, les commentaires par page (fichier annexe .nexus-notes.json) et l'impression. Le surlignage visuel et l'incorporation des annotations dans le PDF ne sont pas encore disponibles. Qt PDF est une dépendance de compilation. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
