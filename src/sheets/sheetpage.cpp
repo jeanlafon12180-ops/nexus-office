@@ -7,7 +7,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QRegularExpression>
-#include <QTableWidget>\n#include <QTabWidget>
+#include <QTableWidget>
+#include <QTabWidget>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
