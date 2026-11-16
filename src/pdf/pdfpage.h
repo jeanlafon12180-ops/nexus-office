@@ -21,7 +21,7 @@ signals:
     void documentOpened(const QString &path, const QString &module);
 
 signals:
-    void documentOpened(const QString &path, const QString &module);
+
 
 private:
     QPdfDocument *document_ = nullptr;
