@@ -48,7 +48,7 @@ private slots:
                 break;
             }
         }
-        QCOMPARE(count, QString("3 mots · 22 caractères"));
+        QCOMPARE(count, QString("4 mots · 22 caractères"));
         QVERIFY(editor->document()->isModified());
     }
 
