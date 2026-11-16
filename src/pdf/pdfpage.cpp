@@ -152,6 +152,7 @@ void PdfPage::openPdf()
         return;
     }
     currentPath_ = path;
+    emit documentOpened(path, "PDF");
     lastSearchPage_ = -1;
     fileLabel_->setText(QFileInfo(path).fileName());
     updateDocumentState();
