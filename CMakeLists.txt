@@ -21,6 +21,7 @@ qt_standard_project_setup()
 
 qt_add_executable(nexus-office
     src/main.cpp
+    src/assets/icons.qrc
     src/mainwindow.cpp
     src/mainwindow.h
     src/writer/writerpage.cpp
