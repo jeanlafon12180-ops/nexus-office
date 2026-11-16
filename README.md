@@ -30,6 +30,10 @@ Les annotations sont conservées à côté du fichier source :
 - LibreOffice Impress et Python 3 pour l'échange PPTX
 - Hunspell et dictionnaire français pour la correction orthographique
 
+## Installation et paquets
+
+Les workflows GitHub Actions construisent des artefacts de validation pour Windows x64 (installateur .exe), macOS (image .dmg) et Linux Debian/Ubuntu x86_64 (.deb). Ces artefacts doivent encore être installés et vérifiés sur des machines propres. Ils ne sont pas signés/notariés et ne doivent pas être considérés comme une version stable publique. Voir [le guide utilisateur](docs/USER-GUIDE.md) et la [checklist de publication](docs/RELEASE-CHECKLIST.md). LibreOffice et Hunspell restent des dépendances séparées pour les fonctions qui les utilisent.
+
 ## Compilation et tests
 
 ```bash
@@ -47,7 +51,7 @@ ctest --test-dir build --output-on-failure
 5. Fonctions communes — modèles, sauvegarde, récupération, paramètres et documents récents.
 6. Qualité et versions finales — compatibilité, stabilité, accessibilité, documentation et paquets Windows/macOS/Linux.
 
-Aucun installateur de version finale n'est publié pendant le développement : les paquets seront préparés après stabilisation des modules.
+Les paquets d’installation sont construits en CI pour validation, mais ne sont pas encore des versions finales signées ou notariées. La publication stable reste conditionnée à la checklist de qualité, aux essais sur machines propres et à la validation de la licence.
 
 ## Licence et marques
 
