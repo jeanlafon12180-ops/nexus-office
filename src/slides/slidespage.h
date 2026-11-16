@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QString>
+class QTimer;
 class QLineEdit;
 class QTextEdit;
 class QLabel;
@@ -25,6 +26,10 @@ private:
     QComboBox *transition_=nullptr;
     QLabel *status_=nullptr;
     int nextSlideNumber_=2;
+    QTimer *recoveryTimer_=nullptr;
+    QString recoveryFile_;
+    void saveRecovery();
+    void restoreRecovery();
     Slide *currentSlide();
     void addSlide();
     void removeSlide();
