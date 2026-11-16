@@ -85,10 +85,10 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Étape 5 — fonctions communes et différenciantes
 
-- [ ] Modèles de documents et galerie de modèles
-- [ ] Sauvegarde automatique et récupération après incident
+- [x] Galerie locale de modèles Writer (lettre, CV, rapport scolaire, facture)
+- [x] Copie de récupération locale périodique pour Writer et proposition de restauration au redémarrage
 - [x] Gestion des documents récents (12 derniers chemins connus) et paramètres communs (thème enregistré localement)
-- [ ] Ajouter une galerie de modèles bureautiques hors ligne
+- [x] Ajouter une première galerie de modèles bureautiques hors ligne pour Writer
 - [x] Ajouter un raccourci clavier commun Ctrl+, pour ouvrir les paramètres
 - [ ] Ajouter la gestion des préférences d'impression et d'export
 - [ ] Étudier la synchronisation et le partage de fichiers comme options facultatives, sans compte obligatoire
@@ -103,7 +103,7 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Fonctions communes déjà intégrées
 
-Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. La sauvegarde automatique, la récupération après incident, les modèles et les préférences d'impression/export restent à développer.
+Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. Writer possède une copie de récupération locale périodique (toutes les 15 secondes lorsque le document est modifié), proposée au prochain lancement. Une galerie de modèles Writer hors ligne propose une lettre, un CV, un rapport scolaire et une facture. Ces fonctions ne couvrent pas encore les classeurs Sheets ni les présentations Slides.
 
 ## Limites connues
 
