@@ -327,6 +327,7 @@ void WriterPage::openDocument()
         else editor_->setPlainText(contents);
     }
     currentFile_ = path;
+    emit documentOpened(path, "Writer");
     editor_->document()->setModified(false);
     updateDocumentInfo();
 }
@@ -410,6 +411,7 @@ bool WriterPage::saveToFile(const QString &path)
             return false;
         }
     }
+    emit documentOpened(path, "Writer");
     editor_->document()->setModified(false);
     updateDocumentInfo();
     return true;
