@@ -28,3 +28,32 @@ jobs:
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
+
+  cross-platform-build:
+    name: ${{ matrix.os }} Qt build and UI tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          modules: 'qtpdf'
+          cache: true
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure
+        env:
+          QT_QPA_PLATFORM: offscreen
