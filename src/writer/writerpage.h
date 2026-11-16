@@ -14,6 +14,9 @@ class WriterPage final : public QWidget
 public:
     explicit WriterPage(QWidget *parent = nullptr);
 
+signals:
+    void documentOpened(const QString &path, const QString &module);
+
 private:
     QTextEdit *editor_ = nullptr;
     QLabel *documentLabel_ = nullptr;
