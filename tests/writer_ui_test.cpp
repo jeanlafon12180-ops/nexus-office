@@ -38,6 +38,8 @@ private slots:
         QVERIFY(editor);
 
         editor->setPlainText("Bonjour Nexus Office");
+        editor->moveCursor(QTextCursor::End);
+        editor->insertPlainText(" !");
         const auto labels = page.findChildren<QLabel *>();
         QString count;
         for (QLabel *label : labels) {
@@ -46,7 +48,7 @@ private slots:
                 break;
             }
         }
-        QCOMPARE(count, QString("3 mots · 20 caractères"));
+        QCOMPARE(count, QString("3 mots · 22 caractères"));
         QVERIFY(editor->document()->isModified());
     }
 
