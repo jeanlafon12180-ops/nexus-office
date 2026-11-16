@@ -1,6 +1,8 @@
 #include "writerpage.h"
 
 #include <QAction>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QFile>
 #include <QSaveFile>
 #include <QInputDialog>
@@ -33,6 +35,9 @@
 #include <QTextEdit>
 #include <QTextDocument>
 #include <QTextStream>
+#include <QTimer>
+#include <QStandardPaths>
+#include <QDir>
 #include <QToolBar>
 #include <QVBoxLayout>
 
@@ -98,6 +103,7 @@ WriterPage::WriterPage(QWidget *parent)
     auto *pdfButton = new QPushButton("Exporter PDF", this);
     auto *printButton = new QPushButton("Imprimer", this);
     auto *spellButton = new QPushButton("Orthographe", this);
+    auto *templateButton = new QPushButton("Modèles", this);
     newButton->setObjectName("writerSecondary");
     openButton->setObjectName("writerSecondary");
     saveButton->setObjectName("writerPrimary");
@@ -107,6 +113,7 @@ WriterPage::WriterPage(QWidget *parent)
     header->addWidget(pdfButton);
     header->addWidget(printButton);
     header->addWidget(spellButton);
+    header->addWidget(templateButton);
     layout->addLayout(header);
 
     auto *notice = new QLabel(
@@ -189,6 +196,7 @@ WriterPage::WriterPage(QWidget *parent)
     connect(pdfButton, &QPushButton::clicked, this, &WriterPage::exportPdf);
     connect(printButton, &QPushButton::clicked, this, &WriterPage::printDocument);
     connect(spellButton, &QPushButton::clicked, this, &WriterPage::checkSpelling);
+    connect(templateButton, &QPushButton::clicked, this, &WriterPage::showTemplates);
     connect(undoAction, &QAction::triggered, editor_, &QTextEdit::undo);
     connect(redoAction, &QAction::triggered, editor_, &QTextEdit::redo);
     auto *findAction = toolbar->addAction("Rechercher");
@@ -225,6 +233,23 @@ WriterPage::WriterPage(QWidget *parent)
     });
 
     connect(editor_, &QTextEdit::textChanged, this, &WriterPage::updateDocumentInfo);
+    recoveryFile_ = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/writer-recovery.html";
+    QDir().mkpath(QFileInfo(recoveryFile_).absolutePath());
+    recoveryTimer_ = new QTimer(this);
+    recoveryTimer_->setInterval(15000);
+    connect(recoveryTimer_, &QTimer::timeout, this, &WriterPage::writeRecoveryCopy);
+    recoveryTimer_->start();
+    QFile recovery(recoveryFile_);
+    if (recovery.exists() && recovery.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        const QString recovered = QString::fromUtf8(recovery.readAll());
+        if (!recovered.isEmpty() && QMessageBox::question(this, "Récupération", "Une version de récupération de Writer a été trouvée. Voulez-vous la restaurer ?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+            editor_->setHtml(recovered);
+            editor_->document()->setModified(true);
+            updateDocumentInfo();
+        } else {
+            clearRecoveryCopy();
+        }
+    }
     connect(editor_->document(), &QTextDocument::modificationChanged,
             this, [this](bool modified) {
                 const QString name = currentFile_.isEmpty()
@@ -285,6 +310,7 @@ void WriterPage::newDocument()
 
     editor_->clear();
     currentFile_.clear();
+    clearRecoveryCopy();
     editor_->document()->setModified(false);
     updateDocumentInfo();
 }
@@ -327,6 +353,7 @@ void WriterPage::openDocument()
         else editor_->setPlainText(contents);
     }
     currentFile_ = path;
+    clearRecoveryCopy();
     emit documentOpened(path, "Writer");
     editor_->document()->setModified(false);
     updateDocumentInfo();
@@ -413,6 +440,7 @@ bool WriterPage::saveToFile(const QString &path)
     }
     emit documentOpened(path, "Writer");
     editor_->document()->setModified(false);
+    clearRecoveryCopy();
     updateDocumentInfo();
     return true;
 }
@@ -590,4 +618,48 @@ void WriterPage::updateDocumentInfo()
     wordCountLabel_->setText(QString("%1 mot%2 · %3 caractères").arg(words).arg(words == 1 ? "" : "s").arg(characters));
     if (currentFile_.isEmpty() && !editor_->document()->isModified())
         documentLabel_->setText("Nouveau document");
+}
+
+void WriterPage::writeRecoveryCopy()
+{
+    if (!editor_ || !editor_->document()->isModified()) return;
+    QSaveFile file(recoveryFile_);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) return;
+    file.write(editor_->toHtml().toUtf8());
+    file.commit();
+}
+
+void WriterPage::clearRecoveryCopy()
+{
+    if (!recoveryFile_.isEmpty()) QFile::remove(recoveryFile_);
+}
+
+void WriterPage::showTemplates()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("Galerie de modèles Writer");
+    auto *layout = new QVBoxLayout(&dialog);
+    auto *choices = new QComboBox(&dialog);
+    choices->addItems({"Lettre professionnelle", "CV simple", "Rapport scolaire", "Facture simple", "Page vierge"});
+    layout->addWidget(new QLabel("Choisissez un modèle :", &dialog));
+    layout->addWidget(choices);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Apply | QDialogButtonBox::Cancel, &dialog);
+    layout->addWidget(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    if (dialog.exec() != QDialog::Accepted) return;
+    if (!editor_->document()->isEmpty() && QMessageBox::question(this, "Remplacer le contenu", "Le modèle remplacera le contenu actuel. Continuer ?", QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) return;
+    const QString choice = choices->currentText();
+    if (choice == "Lettre professionnelle")
+        editor_->setHtml("<h1>Nom et prénom</h1><p>Adresse<br>Code postal – Ville</p><p>Ville, le date</p><p><b>Objet :</b> Objet de la lettre</p><p>Madame, Monsieur,</p><p>Présentez votre demande ici.</p><p>Veuillez agréer, Madame, Monsieur, l’expression de mes salutations distinguées.</p><p>Signature</p>");
+    else if (choice == "CV simple")
+        editor_->setHtml("<h1>Prénom NOM</h1><h2>Profil</h2><p>Présentez votre parcours en quelques lignes.</p><h2>Expériences</h2><p>Poste — Organisation — Dates</p><h2>Formation</h2><p>Diplôme — Établissement — Année</p><h2>Compétences</h2><p>Compétence 1 · Compétence 2</p><h2>Langues</h2><p>Langue — Niveau</p>");
+    else if (choice == "Rapport scolaire")
+        editor_->setHtml("<h1>Titre du rapport</h1><p><b>Nom :</b> … &nbsp; <b>Classe :</b> …</p><h2>Introduction</h2><p>Présentez le sujet et la problématique.</p><h2>Développement</h2><p>Partie 1…</p><h2>Conclusion</h2><p>Résumez les idées principales.</p><h2>Sources</h2><p>Liste des sources consultées.</p>");
+    else if (choice == "Facture simple")
+        editor_->setHtml("<h1>FACTURE</h1><p><b>Émetteur :</b> Nom, adresse</p><p><b>Client :</b> Nom, adresse</p><p><b>Numéro :</b> … &nbsp; <b>Date :</b> …</p><table border='1' cellpadding='5'><tr><th>Désignation</th><th>Quantité</th><th>Prix unitaire</th><th>Total</th></tr><tr><td>Prestation</td><td>1</td><td>0,00 €</td><td>0,00 €</td></tr></table><p><b>Total à payer :</b> 0,00 €</p>");
+    else editor_->clear();
+    currentFile_.clear();
+    editor_->document()->setModified(true);
+    updateDocumentInfo();
 }
