@@ -28,6 +28,8 @@
 #include <QVBoxLayout>
 #include <QInputDialog>
 #include <QImage>
+#include <QSignalBlocker>
+#include <QFont>
 #include <QColor>
 #include <QPolygonF>
 #include <QTransform>
