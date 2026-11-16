@@ -10,6 +10,9 @@ class SheetPage final : public QWidget {
     Q_OBJECT
 public:
     explicit SheetPage(QWidget *parent = nullptr);
+
+signals:
+    void documentOpened(const QString &path, const QString &module);
 private:
     QTableWidget *table_ = nullptr;
     QTabWidget *tabs_ = nullptr;
