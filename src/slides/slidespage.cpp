@@ -278,7 +278,7 @@ void SlidesPage::importPptx()
     for(const auto &entry:imported){
         addSlide();Slide *slide=currentSlide();slide->title->setText(entry.first);slide->body->setPlainText(entry.second);
     }
-    status_->setText(QString("Importées : %1 diapositives (texte)").arg(imported.size()));
+    status_->setText(QString("Importées : %1 diapositives (texte)").arg(imported.size()));emit documentOpened(path, "Slides");
 }
 
 void SlidesPage::exportPptx()
@@ -315,7 +315,7 @@ void SlidesPage::exportPptx()
     if(!QFileInfo::exists(generated)||!QFile::copy(generated,output)){
         QMessageBox::warning(this,"Export PPTX","Le fichier PPTX n'a pas pu être créé.");return;
     }
-    status_->setText("Export PowerPoint terminé (titres et texte).");
+    status_->setText("Export PowerPoint terminé (titres et texte).");emit documentOpened(output, "Slides");
 }
 
 void SlidesPage::exportPdf()
