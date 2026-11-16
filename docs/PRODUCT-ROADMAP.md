@@ -86,11 +86,11 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 ## Étape 5 — fonctions communes et différenciantes
 
 - [x] Galerie locale de modèles Writer (lettre, CV, rapport scolaire, facture)
-- [x] Copie de récupération locale périodique pour Writer et proposition de restauration au redémarrage
+- [x] Copies de récupération locales périodiques pour Writer, Sheets et Slides, avec proposition de restauration au redémarrage
 - [x] Gestion des documents récents (12 derniers chemins connus) et paramètres communs (thème enregistré localement)
 - [x] Ajouter une première galerie de modèles bureautiques hors ligne pour Writer
 - [x] Ajouter un raccourci clavier commun Ctrl+, pour ouvrir les paramètres
-- [ ] Ajouter la gestion des préférences d'impression et d'export
+- [x] Ajouter des préférences communes de format papier (A4, Letter, A3) et d'orientation (portrait/paysage), enregistrées localement et appliquées à Writer, Slides PDF et à l'impression PDF
 - [x] Décider du périmètre de synchronisation et de partage : fonctionnement local hors ligne, sans compte ni cloud obligatoire ; partage par fichiers standards et services externes choisis par l’utilisateur
 
 ## Étape 6 — qualité et versions finales
@@ -103,7 +103,7 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Fonctions communes déjà intégrées
 
-Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. Writer possède une copie de récupération locale périodique (toutes les 15 secondes lorsque le document est modifié), proposée au prochain lancement. Une galerie de modèles Writer hors ligne propose une lettre, un CV, un rapport scolaire et une facture. Ces fonctions ne couvrent pas encore les classeurs Sheets ni les présentations Slides. La synchronisation cloud n’est pas intégrée au périmètre 0.2.x : les documents restent locaux et peuvent être partagés via leurs formats standards (DOCX, XLSX, PPTX, PDF, CSV) ou par un service externe choisi séparément par l’utilisateur.
+Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. Writer possède une copie de récupération locale périodique (toutes les 15 secondes lorsque le document est modifié), proposée au prochain lancement. Une galerie de modèles Writer hors ligne propose une lettre, un CV, un rapport scolaire et une facture. Writer, Sheets et Slides disposent chacun d’une copie de récupération locale périodique (15 secondes) et d’une proposition de restauration au démarrage. Les préférences de papier et d’orientation sont conservées localement et appliquées aux sorties Writer, Slides PDF et impression PDF. La synchronisation cloud n’est pas intégrée au périmètre 0.2.x : les documents restent locaux et peuvent être partagés via leurs formats standards (DOCX, XLSX, PPTX, PDF, CSV) ou par un service externe choisi séparément par l’utilisateur.
 
 ## Limites connues
 
