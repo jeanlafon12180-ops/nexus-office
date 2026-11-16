@@ -17,6 +17,9 @@ class PdfPage final : public QWidget
 public:
     explicit PdfPage(QWidget *parent = nullptr);
 
+signals:
+    void documentOpened(const QString &path, const QString &module);
+
 private:
     QPdfDocument *document_ = nullptr;
     QPdfView *view_ = nullptr;
