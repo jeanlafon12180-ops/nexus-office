@@ -38,6 +38,8 @@
 #include <QCoreApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QTimer>
+#include <QSaveFile>
 
 SlidesPage::SlidesPage(QWidget *parent) : QWidget(parent)
 {
@@ -74,6 +76,13 @@ SlidesPage::SlidesPage(QWidget *parent) : QWidget(parent)
     tabs_=new QTabWidget(this); tabs_->setObjectName("slidesTabs"); root->addWidget(tabs_,1);
     status_=new QLabel("Prêt",this); root->addWidget(status_);
     addSlide(); tabs_->setTabText(0,"Diapositive 1"); nextSlideNumber_=2;
+    recoveryFile_=QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/slides-recovery.json";
+    QDir().mkpath(QFileInfo(recoveryFile_).absolutePath());
+    restoreRecovery();
+    recoveryTimer_=new QTimer(this);
+    recoveryTimer_->setInterval(15000);
+    connect(recoveryTimer_,&QTimer::timeout,this,&SlidesPage::saveRecovery);
+    recoveryTimer_->start();
 }
 SlidesPage::Slide *SlidesPage::currentSlide()
 {
@@ -337,4 +346,48 @@ void SlidesPage::exportPdf()
     printer.setOutputFileName(path); printer.setPageSize(QPageSize(QPageSize::A4));
     printer.setPageOrientation(QPageLayout::Landscape); document.print(&printer);
     status_->setText("Présentation exportée en PDF : "+QFileInfo(path).fileName());
+}
+
+void SlidesPage::saveRecovery()
+{
+    QJsonArray data;
+    for(const auto &slide:slides_){
+        QJsonObject item;
+        item["title"]=slide.title->text();
+        item["body"]=slide.body->toHtml();
+        item["notes"]=slide.notes->toPlainText();
+        data.append(item);
+    }
+    QJsonObject root;
+    root["slides"]=data;
+    root["theme"]=theme_->currentText();
+    QSaveFile file(recoveryFile_);
+    if(file.open(QIODevice::WriteOnly)){
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+        file.commit();
+    }
+}
+void SlidesPage::restoreRecovery()
+{
+    QFile file(recoveryFile_);
+    if(!file.open(QIODevice::ReadOnly))return;
+    const QJsonDocument doc=QJsonDocument::fromJson(file.readAll());
+    if(!doc.isObject()||!doc.object().value("slides").isArray())return;
+    if(QMessageBox::question(this,"Récupération Slides","Une présentation récupérable a été trouvée. Voulez-vous la restaurer ?",QMessageBox::Yes|QMessageBox::No)!=QMessageBox::Yes){
+        QFile::remove(recoveryFile_);return;
+    }
+    for(const auto &slide:slides_){tabs_->removeTab(tabs_->indexOf(slide.page));slide.page->deleteLater();}
+    slides_.clear();nextSlideNumber_=1;
+    for(const auto &value:doc.object().value("slides").toArray()){
+        addSlide();
+        Slide *slide=currentSlide();
+        const auto item=value.toObject();
+        slide->title->setText(item.value("title").toString());
+        slide->body->setHtml(item.value("body").toString());
+        slide->notes->setPlainText(item.value("notes").toString());
+    }
+    const QString savedTheme=doc.object().value("theme").toString();
+    const int themeIndex=theme_->findText(savedTheme);
+    if(themeIndex>=0)theme_->setCurrentIndex(themeIndex);
+    status_->setText("Présentation récupérée automatiquement.");
 }
