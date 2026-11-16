@@ -5,6 +5,7 @@
 
 class QStackedWidget;
 class QListWidget;
+class QListWidgetItem;
 class QLabel;
 class QSettings;
 
@@ -24,6 +25,6 @@ private:
     void loadPreferences();
     void savePreferences();
     void addRecentDocument(const QString &path, const QString &module);
-    void openRecentDocument(QListWidget *item);
+    void openRecentDocument(QListWidgetItem *item);
     void showSettings();
 };
