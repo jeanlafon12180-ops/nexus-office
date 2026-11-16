@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Nexus Office
+Comment=Suite bureautique locale
+Exec=nexus-office
+Icon=nexus-office
+Terminal=false
+Categories=Office;WordProcessor;Spreadsheet;Presentation;
+StartupNotify=true
