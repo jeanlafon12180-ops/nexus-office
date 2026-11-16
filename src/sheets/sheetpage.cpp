@@ -8,6 +8,11 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTableWidget>\n#include <QTabWidget>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QSaveFile>
+#include <QTimer>
 #include <QTextStream>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -77,6 +82,13 @@ SheetPage::SheetPage(QWidget *parent) : QWidget(parent) {
     root->addWidget(status_);
     connect(table_,&QTableWidget::cellChanged,this,[this]{recalculate();});
     setStyleSheet("QTableWidget{background:white;color:#172033;gridline-color:#dce3ed;selection-background-color:#cbd8ff} QHeaderView::section{background:#eef2f8;color:#263449;padding:6px;border:0}");
+    recoveryFile_=QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)+"/sheets-recovery.json";
+    QDir().mkpath(QFileInfo(recoveryFile_).absolutePath());
+    restoreRecovery();
+    recoveryTimer_=new QTimer(this);
+    recoveryTimer_->setInterval(15000);
+    connect(recoveryTimer_,&QTimer::timeout,this,&SheetPage::saveRecovery);
+    recoveryTimer_->start();
 }
 void SheetPage::newSheet()
 {
@@ -304,4 +316,76 @@ void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
     QFile f(path);if(!f.open(QIODevice::WriteOnly|QIODevice::Text)){QMessageBox::warning(this,"Enregistrement impossible",f.errorString());return;}
     QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(FormulaSourceRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());emit documentOpened(path, "Sheets");
+}
+
+void SheetPage::saveRecovery()
+{
+    QJsonArray sheets;
+    for(int index=0;index<tabs_->count();++index){
+        auto *table=qobject_cast<QTableWidget*>(tabs_->widget(index));
+        if(!table)continue;
+        QJsonObject sheet;
+        sheet["name"]=tabs_->tabText(index);
+        sheet["rows"]=table->rowCount();
+        sheet["columns"]=table->columnCount();
+        QJsonArray cells;
+        for(int row=0;row<table->rowCount();++row){
+            QJsonArray values;
+            for(int col=0;col<table->columnCount();++col){
+                auto *item=table->item(row,col);
+                values.append(item?item->data(FormulaSourceRole).toString():QString());
+            }
+            cells.append(values);
+        }
+        sheet["cells"]=cells;
+        sheets.append(sheet);
+    }
+    QJsonObject root;
+    root["sheets"]=sheets;
+    root["active"]=tabs_->currentIndex();
+    QSaveFile file(recoveryFile_);
+    if(file.open(QIODevice::WriteOnly)){
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+        file.commit();
+    }
+}
+void SheetPage::restoreRecovery()
+{
+    QFile file(recoveryFile_);
+    if(!file.open(QIODevice::ReadOnly))return;
+    const QJsonDocument doc=QJsonDocument::fromJson(file.readAll());
+    if(!doc.isObject()||!doc.object().value("sheets").isArray())return;
+    if(QMessageBox::question(this,"Récupération Sheets","Un classeur récupérable a été trouvé. Voulez-vous le restaurer ?",QMessageBox::Yes|QMessageBox::No)!=QMessageBox::Yes){
+        QFile::remove(recoveryFile_);return;
+    }
+    while(tabs_->count()>0){
+        QWidget *page=tabs_->widget(0);
+        tabs_->removeTab(0);
+        page->deleteLater();
+    }
+    nextSheetNumber_=1;
+    for(const auto &value:doc.object().value("sheets").toArray()){
+        const auto sheet=value.toObject();
+        auto *table=new QTableWidget(qBound(1,sheet.value("rows").toInt(30),1000),qBound(1,sheet.value("columns").toInt(12),256),tabs_);
+        table->setObjectName("sheetsTable");
+        table->setAlternatingRowColors(true);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        table->verticalHeader()->setDefaultSectionSize(28);
+        const auto rows=sheet.value("cells").toArray();
+        for(int row=0;row<qMin(table->rowCount(),rows.size());++row){
+            const auto values=rows.at(row).toArray();
+            for(int col=0;col<qMin(table->columnCount(),values.size());++col){
+                const QString text=values.at(col).toString();
+                if(!text.isEmpty())table->setItem(row,col,new QTableWidgetItem(text));
+            }
+        }
+        connect(table,&QTableWidget::cellChanged,this,[this,table]{if(table_==table)recalculate();});
+        tabs_->addTab(table,sheet.value("name").toString("Feuille"));
+        ++nextSheetNumber_;
+    }
+    if(tabs_->count()==0)newSheet();
+    tabs_->setCurrentIndex(qBound(0,doc.object().value("active").toInt(),tabs_->count()-1));
+    table_=qobject_cast<QTableWidget*>(tabs_->currentWidget());
+    recalculate();
+    status_->setText("Classeur récupéré automatiquement.");
 }
