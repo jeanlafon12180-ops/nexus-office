@@ -1,6 +1,6 @@
 # Feuille de route Nexus Office
 
-Objectif : construire une suite bureautique complète, multiplateforme et fiable, avec des fonctions d'assistance supplémentaires. Les versions finales Windows, macOS et Linux seront préparées après la stabilisation des modules.
+Objectif : construire une suite bureautique complète, multiplateforme et fiable, avec des fonctions bureautiques locales, sans service d'intelligence artificielle. Les versions finales Windows, macOS et Linux seront préparées après la stabilisation des modules.
 
 ## État actuel — prototype 0.2.x
 
@@ -80,16 +80,18 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 - [x] Ajouter navigation entre les pages, recherche textuelle et zoom
 - [x] Ajouter des commentaires par page enregistrés dans un fichier annexe JSON
 - [x] Ajouter l'impression du document PDF
-- [ ] Ajouter le surlignage persistant et l'export des annotations dans le PDF
+- [x] Ajouter le surlignage persistant des passages textuels par recherche
+- [x] Exporter un PDF annoté avec les surlignages intégrés et les commentaires ajoutés en pages dédiées
 
 ## Étape 5 — fonctions communes et différenciantes
 
 - [ ] Modèles de documents et galerie de modèles
 - [ ] Sauvegarde automatique et récupération après incident
 - [ ] Gestion des documents récents et paramètres communs
-- [ ] Assistant IA pour rédiger, corriger et résumer
-- [ ] Assistance IA pour analyser les tableaux et préparer des présentations
-- [ ] Étudier la collaboration et le partage de documents
+- [ ] Ajouter une galerie de modèles bureautiques hors ligne
+- [ ] Ajouter des raccourcis clavier cohérents entre les modules
+- [ ] Ajouter la gestion des préférences d'impression et d'export
+- [ ] Étudier la synchronisation et le partage de fichiers comme options facultatives, sans compte obligatoire
 
 ## Étape 6 — qualité et versions finales
 
@@ -101,4 +103,4 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 ## Limites connues
 
-Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides propose un diaporama avec transitions et un import/export PPTX de base via LibreOffice. Le passage PPTX ne conserve actuellement que les titres et le texte des diapositives ; les éléments riches (images, tableaux, formes, notes, thèmes et animations) ne sont pas encore préservés. Le module nécessite LibreOffice Impress et Python 3 pour l'échange PPTX. Le module PDF intègre un lecteur Qt PDF, la navigation, le zoom, la recherche textuelle, les commentaires par page (fichier annexe .nexus-notes.json) et l'impression. Le surlignage visuel et l'incorporation des annotations dans le PDF ne sont pas encore disponibles. Qt PDF est une dépendance de compilation. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
+Nexus Office reste un prototype. Writer s'appuie sur LibreOffice pour convertir les fichiers DOCX et ne garantit pas encore une fidélité complète aux documents complexes. Le correcteur orthographique nécessite Hunspell et un dictionnaire français installés sur le système. Sheets importe et exporte les fichiers XLSX via LibreOffice, mais ne traite que la feuille active : les autres feuilles du classeur ne sont pas encore conservées. Les graphiques sont des aperçus temporaires, pas des objets enregistrés dans le fichier. L'analyse CSV reste simplifiée et ne gère pas encore les champs contenant des retours à la ligne. Slides propose un diaporama avec transitions et un import/export PPTX de base via LibreOffice. Le passage PPTX ne conserve actuellement que les titres et le texte des diapositives ; les éléments riches (images, tableaux, formes, notes, thèmes et animations) ne sont pas encore préservés. Le module nécessite LibreOffice Impress et Python 3 pour l'échange PPTX. Le module PDF intègre un lecteur Qt PDF, la navigation, le zoom, la recherche textuelle, les commentaires par page (fichier annexe .nexus-notes.json) et l'impression. Le surlignage est enregistré dans un fichier annexe .nexus-highlights.json et intégré au PDF via l'export annoté ; les commentaires sont enregistrés dans .nexus-notes.json et ajoutés en pages dédiées à l'export. Les annotations ne sont pas encore des objets PDF natifs modifiables séparément dans d'autres lecteurs. Qt PDF est une dépendance de compilation. Les fonctionnalités cochées décrivent le périmètre MVP validé, pas un niveau de finition commercial.
