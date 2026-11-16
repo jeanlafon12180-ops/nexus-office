@@ -87,6 +87,15 @@ if(BUILD_TESTING)
     add_test(NAME slides-ui-structure COMMAND slides-ui-tests)
     set_tests_properties(slides-ui-structure PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
+    qt_add_executable(pdf-ui-tests
+        tests/pdf_ui_test.cpp
+        src/pdf/pdfpage.cpp
+        src/pdf/pdfpage.h
+    )
+    target_link_libraries(pdf-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Pdf Qt6::PdfWidgets)
+    add_test(NAME pdf-ui-structure COMMAND pdf-ui-tests)
+    set_tests_properties(pdf-ui-structure PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
     find_package(Python3 COMPONENTS Interpreter QUIET)
     find_program(LIBREOFFICE_EXECUTABLE NAMES soffice)
     if(LIBREOFFICE_EXECUTABLE)
