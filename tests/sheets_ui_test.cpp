@@ -5,6 +5,8 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTest>
+#include <QStandardPaths>
+#include <QPushButton>
 
 class SheetsUiTest final : public QObject
 {
