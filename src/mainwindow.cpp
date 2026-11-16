@@ -221,6 +221,17 @@ void MainWindow::showSettings()
     appearance->setCurrentIndex(darkTheme_ ? 0 : 1);
     layout->addWidget(new QLabel("Apparence", &dialog));
     layout->addWidget(appearance);
+    auto *paper = new QComboBox(&dialog);
+    paper->addItems({"A4", "Letter", "A3"});
+    auto *orientation = new QComboBox(&dialog);
+    orientation->addItems({"Portrait", "Paysage"});
+    QSettings current;
+    paper->setCurrentText(current.value("document/paperSize", "A4").toString());
+    orientation->setCurrentText(current.value("document/orientation", "Portrait").toString());
+    layout->addWidget(new QLabel("Format de papier par défaut", &dialog));
+    layout->addWidget(paper);
+    layout->addWidget(new QLabel("Orientation par défaut", &dialog));
+    layout->addWidget(orientation);
     layout->addWidget(new QLabel("Les préférences sont enregistrées sur cet appareil.", &dialog));
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel, &dialog);
     layout->addWidget(buttons);
@@ -230,6 +241,10 @@ void MainWindow::showSettings()
     darkTheme_ = appearance->currentData().toBool();
     applyTheme(darkTheme_);
     savePreferences();
+    QSettings settings;
+    settings.setValue("document/paperSize", paper->currentText());
+    settings.setValue("document/orientation", orientation->currentText());
+    settings.sync();
 }
 
 void MainWindow::applyTheme(bool dark)
