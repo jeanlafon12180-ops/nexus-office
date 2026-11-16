@@ -38,6 +38,7 @@
 #include <QCoreApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QSettings>
 #include <QTimer>
 #include <QSaveFile>
 
@@ -343,8 +344,12 @@ void SlidesPage::exportPdf()
     html+="</body></html>";
     QTextDocument document; document.setHtml(html);
     QPrinter printer(QPrinter::HighResolution); printer.setOutputFormat(QPrinter::PdfFormat);
-    printer.setOutputFileName(path); printer.setPageSize(QPageSize(QPageSize::A4));
-    printer.setPageOrientation(QPageLayout::Landscape); document.print(&printer);
+    printer.setOutputFileName(path);
+    QSettings preferences;
+    const QString paper=preferences.value("document/paperSize", "A4").toString();
+    printer.setPageSize(QPageSize(paper=="A3" ? QPageSize::A3 : paper=="Letter" ? QPageSize::Letter : QPageSize::A4));
+    printer.setPageOrientation(preferences.value("document/orientation", "Paysage").toString()=="Portrait" ? QPageLayout::Portrait : QPageLayout::Landscape);
+    document.print(&printer);
     status_->setText("Présentation exportée en PDF : "+QFileInfo(path).fileName());
 }
 
