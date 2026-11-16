@@ -145,7 +145,7 @@ void SheetPage::openCsv(){
         for(int i=0;i<line.size();++i){QChar ch=line[i];if(ch=='"'){if(quoted&&i+1<line.size()&&line[i+1]=='"'){cur+='"';++i;}else quoted=!quoted;}else if(ch==','&&!quoted){values<<cur;cur.clear();}else cur+=ch;}values<<cur;
         if(table_->columnCount()<values.size())table_->setColumnCount(values.size());table_->insertRow(row);
         for(int c=0;c<values.size();++c)table_->setItem(row,c,new QTableWidgetItem(values[c]));++row;}
-    if(table_->columnCount()==0)table_->setColumnCount(1);table_->setRowCount(qMax(30,table_->rowCount()));table_->blockSignals(false);recalculate();status_->setText("Ouvert : "+QFileInfo(path).fileName());
+    if(table_->columnCount()==0)table_->setColumnCount(1);table_->setRowCount(qMax(30,table_->rowCount()));table_->blockSignals(false);recalculate();status_->setText("Ouvert : "+QFileInfo(path).fileName());emit documentOpened(path, "Sheets");
 }
 
 void SheetPage::openXlsx()
@@ -184,7 +184,7 @@ void SheetPage::openXlsx()
     }
     if (table_->columnCount()==0) table_->setColumnCount(1);
     table_->setRowCount(qMax(30,table_->rowCount())); table_->blockSignals(false); recalculate();
-    status_->setText("Classeur XLSX importé (première feuille) : "+QFileInfo(path).fileName());
+    status_->setText("Classeur XLSX importé (première feuille) : "+QFileInfo(path).fileName());emit documentOpened(path, "Sheets");
 }
 
 void SheetPage::saveXlsx()
@@ -225,7 +225,7 @@ void SheetPage::saveXlsx()
     if (!QFileInfo::exists(generated) || !QFile::copy(generated,path)) {
         QMessageBox::warning(this,"Export XLSX","Le fichier XLSX n'a pas pu être créé à cet emplacement."); return;
     }
-    status_->setText("Export XLSX terminé (feuille active) : "+QFileInfo(path).fileName());
+    status_->setText("Export XLSX terminé (feuille active) : "+QFileInfo(path).fileName());emit documentOpened(path, "Sheets");
 }
 
 void SheetPage::sortByCurrentColumn()
@@ -303,5 +303,5 @@ void SheetPage::showChart()
 void SheetPage::saveCsv(){
     const QString path=QFileDialog::getSaveFileName(this,"Enregistrer le CSV","Tableau.csv","Fichiers CSV (*.csv)");if(path.isEmpty())return;
     QFile f(path);if(!f.open(QIODevice::WriteOnly|QIODevice::Text)){QMessageBox::warning(this,"Enregistrement impossible",f.errorString());return;}
-    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(FormulaSourceRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());
+    QTextStream out(&f);for(int r=0;r<table_->rowCount();++r){QStringList row;for(int c=0;c<table_->columnCount();++c){QString v=table_->item(r,c)?table_->item(r,c)->data(FormulaSourceRole).toString():QString();v.replace('"',"\"\"");if(v.contains(',')||v.contains('"')||v.contains('\n'))v='"'+v+'"';row<<v;}out<<row.join(',')<<'\n';}status_->setText("Enregistré : "+QFileInfo(path).fileName());emit documentOpened(path, "Sheets");
 }
