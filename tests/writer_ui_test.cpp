@@ -6,6 +6,8 @@
 #include <QTextEdit>
 #include <QToolBar>
 #include <QTest>
+#include <QStandardPaths>
+#include <QTextCursor>
 #include <QFont>
 
 class WriterUiTest final : public QObject
