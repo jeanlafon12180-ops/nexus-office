@@ -15,6 +15,7 @@
 #include <QKeySequence>
 #include <QLabel>
 #include <QListWidget>
+#include <QListWidgetItem>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -198,7 +199,7 @@ void MainWindow::addRecentDocument(const QString &path, const QString &module)
     }
 }
 
-void MainWindow::openRecentDocument(QListWidget *item)
+void MainWindow::openRecentDocument(QListWidgetItem *item)
 {
     if (!item) return;
     const QString path = item->text().section('\n', 1);
