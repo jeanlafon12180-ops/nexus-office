@@ -87,9 +87,9 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 
 - [ ] Modèles de documents et galerie de modèles
 - [ ] Sauvegarde automatique et récupération après incident
-- [ ] Gestion des documents récents et paramètres communs
+- [x] Gestion des documents récents (12 derniers chemins connus) et paramètres communs (thème enregistré localement)
 - [ ] Ajouter une galerie de modèles bureautiques hors ligne
-- [ ] Ajouter des raccourcis clavier cohérents entre les modules
+- [x] Ajouter un raccourci clavier commun Ctrl+, pour ouvrir les paramètres
 - [ ] Ajouter la gestion des préférences d'impression et d'export
 - [ ] Étudier la synchronisation et le partage de fichiers comme options facultatives, sans compte obligatoire
 
@@ -100,6 +100,10 @@ Objectif : construire une suite bureautique complète, multiplateforme et fiable
 - [ ] Vérifier les installations sur Linux, macOS et Windows
 - [ ] Préparer les paquets natifs pour chaque système
 - [ ] Documentation utilisateur, site officiel et mises à jour
+
+## Fonctions communes déjà intégrées
+
+Les préférences d'apparence (thème clair/sombre) sont enregistrées localement avec QSettings. L'accueil affiche les 12 derniers fichiers ouverts ou exportés signalés par les modules ; un double-clic les ouvre avec l'application associée du système. Les fichiers récents sont des chemins locaux : si un fichier est déplacé ou supprimé, l'entrée n'est plus affichée. Le raccourci Ctrl+, ouvre les paramètres. La sauvegarde automatique, la récupération après incident, les modèles et les préférences d'impression/export restent à développer.
 
 ## Limites connues
 
