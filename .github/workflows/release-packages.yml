@@ -1,0 +1,102 @@
+name: Nexus Office — release packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer:
+    name: Windows x64 installer
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          modules: 'qtpdf'
+          cache: true
+      - name: Configure and build
+        shell: pwsh
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel
+          ctest --test-dir build -C Release --output-on-failure
+      - name: Stage application
+        shell: pwsh
+        run: |
+          cmake --install build --config Release --prefix dist
+          windeployqt --release --no-translations dist/bin/nexus-office.exe
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist-output | Out-Null
+          iscc /DSourceDir="dist\bin" /DHelperDir="dist\share\nexus-office" /DOutputDir="dist-output" installer/windows/NexusOffice.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NexusOffice-Windows-x64
+          path: dist-output/*.exe
+          if-no-files-found: error
+
+  macos-disk-image:
+    name: macOS universal architecture runner
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          modules: 'qtpdf'
+          cache: true
+      - name: Configure and build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+      - name: Deploy Qt and create DMG
+        run: |
+          cmake --install build --prefix dist
+          APP="dist/nexus-office.app"
+          test -d "$APP"
+          macdeployqt "$APP" -always-overwrite
+          mkdir -p dist-output
+          hdiutil create -volname "Nexus Office" -srcfolder "$APP" -ov -format UDZO "dist-output/NexusOffice-macOS.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NexusOffice-macOS
+          path: dist-output/*.dmg
+          if-no-files-found: error
+
+  linux-deb:
+    name: Linux x86_64 Debian package
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ qt6-base-dev qt6-pdf-dev qt6-tools-dev libreoffice-writer libreoffice-impress hunspell hunspell-fr
+      - name: Configure, build and test
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+      - name: Build Debian package
+        run: |
+          cd build
+          cpack -G DEB
+          mkdir -p ../dist-output
+          cp ./*.deb ../dist-output/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NexusOffice-Linux-x86_64
+          path: dist-output/*.deb
+          if-no-files-found: error
