@@ -15,7 +15,7 @@ option(NEXUS_ENABLE_LIBREOFFICEKIT
     OFF
 )
 
-find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets PrintSupport Pdf PdfWidgets)
+find_package(Qt6 6.2 REQUIRED COMPONENTS Widgets PrintSupport Pdf PdfWidgets Test)
 
 qt_standard_project_setup()
 
@@ -73,6 +73,15 @@ if(BUILD_TESTING)
         src/document/unavailabledocumentengine.h
     )
     add_test(NAME documentengine-contract COMMAND documentengine-tests)
+
+    qt_add_executable(writer-ui-tests
+        tests/writer_ui_test.cpp
+        src/writer/writerpage.cpp
+        src/writer/writerpage.h
+    )
+    target_link_libraries(writer-ui-tests PRIVATE Qt6::Widgets Qt6::PrintSupport Qt6::Test)
+    add_test(NAME writer-ui-regression COMMAND writer-ui-tests)
+    set_tests_properties(writer-ui-regression PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
     add_executable(formulaengine-tests tests/formulaengine_test.cpp)
     target_link_libraries(formulaengine-tests PRIVATE Qt6::Core)
