@@ -1,6 +1,7 @@
 #pragma once
 #include <QWidget>
 #include <QString>
+class QTimer;
 
 class QTableWidget;
 class QTabWidget;
@@ -17,6 +18,10 @@ private:
     QTableWidget *table_ = nullptr;
     QTabWidget *tabs_ = nullptr;
     int nextSheetNumber_ = 2;
+    QTimer *recoveryTimer_ = nullptr;
+    QString recoveryFile_;
+    void saveRecovery();
+    void restoreRecovery();
     QLabel *status_ = nullptr;
     void newSheet();
     void openCsv();
