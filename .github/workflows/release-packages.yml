@@ -47,8 +47,8 @@ jobs:
           if-no-files-found: error
 
   macos-disk-image:
-    name: macOS universal architecture runner
-    runs-on: macos-14
+    name: macOS x86_64 disk image
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Install Qt
