@@ -28,6 +28,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QMenuBar>
 #include <QPushButton>
 #include <QProcess>
 #include <QStandardPaths>
