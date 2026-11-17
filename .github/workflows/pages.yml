@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -24,6 +25,37 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: NexusOffice-Windows-x64
+          path: website/downloads
+          run-id: 43924625598
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download macOS installer
+        uses: actions/download-artifact@v4
+        with:
+          name: NexusOffice-macOS
+          path: website/downloads
+          run-id: 43924625598
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Linux installer
+        uses: actions/download-artifact@v4
+        with:
+          name: NexusOffice-Linux-x86_64
+          path: website/downloads
+          run-id: 43924625598
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify installer files
+        run: |
+          test -s website/downloads/NexusOffice-Setup-0.2.0-x64.exe
+          test -s website/downloads/NexusOffice-macOS.dmg
+          test -s website/downloads/nexus-office-0.2.0-x86_64.deb
+          ls -lh website/downloads/
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
