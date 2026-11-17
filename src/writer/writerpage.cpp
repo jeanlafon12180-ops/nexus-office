@@ -90,108 +90,175 @@ bool convertWithLibreOffice(const QStringList &args, QString *error)
 WriterPage::WriterPage(QWidget *parent)
     : QWidget(parent)
 {
+    setObjectName("writerWorkspace");
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(28, 24, 28, 24);
-    layout->setSpacing(12);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
 
-    auto *header = new QHBoxLayout;
-    auto *heading = new QLabel("Nexus Writer", this);
-    heading->setObjectName("writerHeading");
-    header->addWidget(heading);
-    header->addStretch();
+    // LibreOffice-inspired menu bar
+    auto *menuBar = new QMenuBar(this);
+    menuBar->setObjectName("writerMenuBar");
+    auto *fileMenu = menuBar->addMenu("Fichier");
+    auto *editMenu = menuBar->addMenu("Édition");
+    auto *viewMenu = menuBar->addMenu("Affichage");
+    auto *insertMenu = menuBar->addMenu("Insertion");
+    auto *formatMenu = menuBar->addMenu("Format");
+    auto *stylesMenu = menuBar->addMenu("Styles");
+    auto *tableMenu = menuBar->addMenu("Tableau");
+    auto *toolsMenu = menuBar->addMenu("Outils");
+    auto *windowMenu = menuBar->addMenu("Fenêtre");
+    auto *helpMenu = menuBar->addMenu("Aide");
+    layout->addWidget(menuBar);
 
-    auto *newButton = new QPushButton("Nouveau", this);
-    auto *openButton = new QPushButton("Ouvrir", this);
-    auto *saveButton = new QPushButton("Enregistrer", this);
-    auto *pdfButton = new QPushButton("Exporter PDF", this);
-    auto *printButton = new QPushButton("Imprimer", this);
-    auto *spellButton = new QPushButton("Orthographe", this);
-    auto *templateButton = new QPushButton("Modèles", this);
-    newButton->setObjectName("writerSecondary");
-    openButton->setObjectName("writerSecondary");
-    saveButton->setObjectName("writerPrimary");
-    header->addWidget(newButton);
-    header->addWidget(openButton);
-    header->addWidget(saveButton);
-    header->addWidget(pdfButton);
-    header->addWidget(printButton);
-    header->addWidget(spellButton);
-    header->addWidget(templateButton);
-    layout->addLayout(header);
+    auto *fileNew = fileMenu->addAction("Nouveau");
+    auto *fileOpen = fileMenu->addAction("Ouvrir…");
+    auto *fileSave = fileMenu->addAction("Enregistrer");
+    fileMenu->addSeparator();
+    auto *filePdf = fileMenu->addAction("Exporter en PDF…");
+    auto *filePrint = fileMenu->addAction("Imprimer…");
+    auto *editUndo = editMenu->addAction("Annuler");
+    auto *editRedo = editMenu->addAction("Rétablir");
+    auto *editFind = editMenu->addAction("Rechercher…");
+    auto *insertTable = insertMenu->addAction("Tableau…");
+    auto *insertImage = insertMenu->addAction("Image…");
+    auto *toolSpell = toolsMenu->addAction("Vérification orthographique");
+    auto *helpAbout = helpMenu->addAction("À propos de Nexus Writer");
+    Q_UNUSED(viewMenu);
+    Q_UNUSED(formatMenu);
+    Q_UNUSED(stylesMenu);
+    Q_UNUSED(tableMenu);
+    Q_UNUSED(windowMenu);
+    Q_UNUSED(helpAbout);
 
-    auto *notice = new QLabel(
-        "Rédigez et mettez en forme vos documents. Enregistrement HTML, TXT, Markdown et DOCX (via LibreOffice).",
-        this);
-    notice->setObjectName("writerNotice");
-    notice->setWordWrap(true);
-    layout->addWidget(notice);
+    // Compact file / editing toolbar
+    auto *fileToolbar = new QToolBar("Standard", this);
+    fileToolbar->setObjectName("writerStandardToolbar");
+    fileToolbar->setMovable(false);
+    fileToolbar->setIconSize(QSize(18, 18));
+    fileToolbar->addAction(fileNew);
+    fileToolbar->addAction(fileOpen);
+    fileToolbar->addAction(fileSave);
+    fileToolbar->addSeparator();
+    fileToolbar->addAction(filePdf);
+    fileToolbar->addAction(filePrint);
+    fileToolbar->addSeparator();
+    fileToolbar->addAction(editUndo);
+    fileToolbar->addAction(editRedo);
+    fileToolbar->addAction(editFind);
+    layout->addWidget(fileToolbar);
 
-    auto *toolbar = new QToolBar("Mise en forme", this);
+    // Formatting toolbar
+    auto *toolbar = new QToolBar("Formatage", this);
     toolbar->setObjectName("writerToolbar");
     toolbar->setMovable(false);
+    toolbar->setIconSize(QSize(18, 18));
+
+    auto *paragraphStyle = new QComboBox(toolbar);
+    paragraphStyle->addItems({"Style par défaut", "Titre 1", "Titre 2", "Titre 3"});
+    paragraphStyle->setMinimumWidth(170);
+    toolbar->addWidget(paragraphStyle);
 
     auto *fontFamily = new QFontComboBox(toolbar);
     fontFamily->setMaximumWidth(190);
-    fontFamily->setCurrentFont(QFont("Arial"));
+    fontFamily->setCurrentFont(QFont("Liberation Serif"));
     toolbar->addWidget(fontFamily);
 
     auto *fontSize = new QSpinBox(toolbar);
     fontSize->setRange(8, 72);
     fontSize->setValue(12);
     fontSize->setSuffix(" pt");
-    fontSize->setMaximumWidth(82);
+    fontSize->setMaximumWidth(78);
     toolbar->addWidget(fontSize);
+    toolbar->addSeparator();
 
-    toolbar->addSeparator();
-    auto *undoAction = toolbar->addAction("Annuler");
-    auto *redoAction = toolbar->addAction("Rétablir");
-    undoAction->setShortcut(QKeySequence::Undo);
-    redoAction->setShortcut(QKeySequence::Redo);
-    toolbar->addSeparator();
-    auto *paragraphStyle = new QComboBox(toolbar);
-    paragraphStyle->addItems({"Corps de texte", "Titre 1", "Titre 2", "Titre 3"});
-    paragraphStyle->setToolTip("Style du paragraphe");
-    toolbar->addWidget(paragraphStyle);
-    toolbar->addSeparator();
-    auto *boldAction = toolbar->addAction("Gras");
+    auto *boldAction = toolbar->addAction("G");
     boldAction->setCheckable(true);
-    boldAction->setToolTip("Mettre en gras");
-
-    auto *italicAction = toolbar->addAction("Italique");
+    boldAction->setToolTip("Gras");
+    auto *italicAction = toolbar->addAction("I");
     italicAction->setCheckable(true);
-    italicAction->setToolTip("Mettre en italique");
-
-    auto *underlineAction = toolbar->addAction("Souligné");
+    italicAction->setToolTip("Italique");
+    auto *underlineAction = toolbar->addAction("S");
     underlineAction->setCheckable(true);
-    underlineAction->setToolTip("Souligner");
-
+    underlineAction->setToolTip("Souligné");
     toolbar->addSeparator();
-
-    auto *leftAction = toolbar->addAction("Gauche");
+    auto *leftAction = toolbar->addAction("Aligner à gauche");
     auto *centerAction = toolbar->addAction("Centrer");
-    auto *rightAction = toolbar->addAction("Droite");
+    auto *rightAction = toolbar->addAction("Aligner à droite");
     auto *justifyAction = toolbar->addAction("Justifier");
+    toolbar->addSeparator();
     auto *bulletAction = toolbar->addAction("Liste •");
     auto *numberAction = toolbar->addAction("Liste 1.");
-    auto *tableAction = toolbar->addAction("Insérer tableau");
-    auto *imageAction = toolbar->addAction("Insérer image");
-
+    auto *tableAction = toolbar->addAction("Tableau");
+    auto *imageAction = toolbar->addAction("Image");
     layout->addWidget(toolbar);
 
-    editor_ = new QTextEdit(this);
+    // Grey workspace with a centered white A4-like page
+    auto *workspace = new QWidget(this);
+    workspace->setObjectName("writerCanvas");
+    auto *workspaceLayout = new QHBoxLayout(workspace);
+    workspaceLayout->setContentsMargins(24, 24, 24, 24);
+    workspaceLayout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    editor_ = new QTextEdit(workspace);
     editor_->setObjectName("writerEditor");
     editor_->setAcceptRichText(true);
     editor_->setPlaceholderText("Commencez à écrire votre document…");
-    editor_->setFont(QFont("Arial", 12));
-    layout->addWidget(editor_, 1);
+    editor_->setFont(QFont("Liberation Serif", 12));
+    editor_->setMinimumWidth(650);
+    editor_->setMaximumWidth(850);
+    editor_->setMinimumHeight(1050);
+    editor_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    editor_->document()->setDocumentMargin(72);
+    workspaceLayout->addWidget(editor_);
+    layout->addWidget(workspace, 1);
 
-    auto *footer = new QHBoxLayout;
-    documentLabel_ = new QLabel("Nouveau document", this);
-    wordCountLabel_ = new QLabel("0 mot", this);
-    footer->addWidget(documentLabel_);
-    footer->addStretch();
-    footer->addWidget(wordCountLabel_);
-    layout->addLayout(footer);
+    // LibreOffice-style status bar
+    auto *statusBar = new QWidget(this);
+    statusBar->setObjectName("writerStatusBar");
+    auto *statusLayout = new QHBoxLayout(statusBar);
+    statusLayout->setContentsMargins(10, 4, 10, 4);
+    documentLabel_ = new QLabel("Page 1 de 1", statusBar);
+    wordCountLabel_ = new QLabel("0 mot, 0 caractère", statusBar);
+    statusLayout->addWidget(documentLabel_);
+    statusLayout->addSpacing(24);
+    statusLayout->addWidget(wordCountLabel_);
+    statusLayout->addStretch();
+    auto *languageLabel = new QLabel("Français (France)", statusBar);
+    auto *zoomLabel = new QLabel("100 %", statusBar);
+    statusLayout->addWidget(languageLabel);
+    statusLayout->addSpacing(18);
+    statusLayout->addWidget(zoomLabel);
+    layout->addWidget(statusBar);
+
+    connect(fileNew, &QAction::triggered, this, &WriterPage::newDocument);
+    connect(fileOpen, &QAction::triggered, this, &WriterPage::openDocument);
+    connect(fileSave, &QAction::triggered, this, &WriterPage::saveDocument);
+    connect(filePdf, &QAction::triggered, this, &WriterPage::exportPdf);
+    connect(filePrint, &QAction::triggered, this, &WriterPage::printDocument);
+    connect(editUndo, &QAction::triggered, editor_, &QTextEdit::undo);
+    connect(editRedo, &QAction::triggered, editor_, &QTextEdit::redo);
+    connect(editFind, &QAction::triggered, this, &WriterPage::findText);
+    connect(toolSpell, &QAction::triggered, this, &WriterPage::checkSpelling);
+    connect(insertTable, &QAction::triggered, this, &WriterPage::insertTable);
+    connect(insertImage, &QAction::triggered, this, &WriterPage::insertImage);
+    connect(paragraphStyle, qOverload<int>(&QComboBox::currentIndexChanged), this, &WriterPage::applyParagraphStyle);
+    connect(bulletAction, &QAction::triggered, this, [this]() { insertList(false); });
+    connect(numberAction, &QAction::triggered, this, [this]() { insertList(true); });
+    connect(tableAction, &QAction::triggered, this, &WriterPage::insertTable);
+    connect(imageAction, &QAction::triggered, this, &WriterPage::insertImage);
+
+    connect(fontFamily, &QFontComboBox::currentFontChanged,
+            editor_, &QTextEdit::setCurrentFont);
+    connect(fontSize, qOverload<int>(&QSpinBox::valueChanged),
+            editor_, [this](int size) { editor_->setFontPointSize(size); });
+    connect(boldAction, &QAction::toggled, editor_, [this](bool enabled) {
+        editor_->setFontWeight(enabled ? QFont::Bold : QFont::Normal);
+    });
+    connect(italicAction, &QAction::toggled, editor_, &QTextEdit::setFontItalic);
+    connect(underlineAction, &QAction::toggled, editor_, &QTextEdit::setFontUnderline);
+    connect(leftAction, &QAction::triggered, editor_, [this]() { editor_->setAlignment(Qt::AlignLeft); });
+    connect(centerAction, &QAction::triggered, editor_, [this]() { editor_->setAlignment(Qt::AlignHCenter); });
+    connect(rightAction, &QAction::triggered, editor_, [this]() { editor_->setAlignment(Qt::AlignRight); });
+    connect(justifyAction, &QAction::triggered, editor_, [this]() { editor_->setAlignment(Qt::AlignJustify); });
 
     connect(newButton, &QPushButton::clicked, this, &WriterPage::newDocument);
     connect(openButton, &QPushButton::clicked, this, &WriterPage::openDocument);
@@ -262,29 +329,34 @@ WriterPage::WriterPage(QWidget *parent)
             });
 
     setStyleSheet(R"(
-        QLabel { background: transparent; border: 0; }
-        QLabel { background: transparent; border: 0; }
-        QLabel#writerHeading { font-size: 27px; font-weight: 750; color: #172033; }
-        QLabel#writerNotice {
-            background: #eaf1ff; color: #294b82;
-            border: 1px solid #d5e2ff; border-radius: 8px; padding: 10px 12px;
+        QWidget#writerWorkspace { background: #202020; color: #eeeeee; }
+        QMenuBar#writerMenuBar { background: #242424; color: #f1f1f1; border: 0; padding: 3px 5px; }
+        QMenuBar#writerMenuBar::item { padding: 5px 9px; background: transparent; }
+        QMenuBar#writerMenuBar::item:selected { background: #3b3b3b; }
+        QMenu { background: #292929; color: #f1f1f1; border: 1px solid #555555; }
+        QMenu::item:selected { background: #315b9b; }
+        QToolBar#writerStandardToolbar, QToolBar#writerToolbar {
+            background: #292929; color: #f2f2f2; border: 0; spacing: 5px; padding: 4px 6px;
         }
-        QToolBar#writerToolbar {
-            background: #ffffff; border: 1px solid #e1e6ef;
-            border-radius: 8px; spacing: 5px; padding: 5px;
+        QToolBar#writerStandardToolbar QToolButton, QToolBar#writerToolbar QToolButton {
+            color: #f2f2f2; background: transparent; border: 0; padding: 5px 7px; border-radius: 3px;
         }
+        QToolBar#writerStandardToolbar QToolButton:hover, QToolBar#writerToolbar QToolButton:hover {
+            background: #454545;
+        }
+        QToolBar#writerToolbar QComboBox, QToolBar#writerToolbar QSpinBox {
+            background: #f7f7f7; color: #202020; border: 1px solid #777777; padding: 3px;
+        }
+        QWidget#writerCanvas { background: #202020; }
         QTextEdit#writerEditor {
-            background: #ffffff; color: #172033;
-            border: 1px solid #dce2ec; border-radius: 8px;
-            padding: 22px; selection-background-color: #b9ccff;
+            background: #ffffff; color: #111111; border: 1px solid #bdbdbd;
+            padding: 0px; selection-background-color: #b7d2ff;
         }
-        QPushButton#writerSecondary, QPushButton#writerPrimary {
-            border: 0; border-radius: 7px; padding: 9px 15px;
+        QWidget#writerStatusBar {
+            background: #252525; color: #eeeeee; border-top: 1px solid #444444;
         }
-        QPushButton#writerSecondary { background: #e9edf5; color: #263449; }
-        QPushButton#writerPrimary { background: #315be8; color: white; }
+        QWidget#writerStatusBar QLabel { color: #eeeeee; padding: 2px 5px; }
     )");
-
     updateDocumentInfo();
 }
 
